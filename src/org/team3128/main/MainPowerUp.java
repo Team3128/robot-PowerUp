@@ -39,7 +39,6 @@ public class MainPowerUp extends NarwhalRobot {
 	public ListenerManager listenerLeft;
 
 	public Joystick rightJoystick;
-	// public Joystick leftJoystick;
 
 	// Misc(general)
 	public PowerDistributionPanel powerDistPanel;
@@ -47,10 +46,10 @@ public class MainPowerUp extends NarwhalRobot {
 	@Override
 	protected void constructHardware() {
 		// Drive Train Setup
-		leftDrive1 = new TalonSRX(20);
-		leftDrive2 = new TalonSRX(21);
-		rightDrive1 = new TalonSRX(10);
-		rightDrive2 = new TalonSRX(11);
+		leftDrive1 = new TalonSRX(1);
+		leftDrive2 = new TalonSRX(2);
+		rightDrive1 = new TalonSRX(3);
+		rightDrive2 = new TalonSRX(4);
 		
 		rightDrive1.setInverted(true);
 
@@ -62,7 +61,6 @@ public class MainPowerUp extends NarwhalRobot {
 		leftDrive2.set(ControlMode.Follower, leftDrive1.getDeviceID());
 		rightDrive2.set(ControlMode.Follower, rightDrive1.getDeviceID());
 
-
 		// create SRXTankDrive
 		drive = new SRXTankDrive(leftDrive1, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in,
 				30.5 * Length.in, 400);
@@ -72,12 +70,8 @@ public class MainPowerUp extends NarwhalRobot {
 
 		// set Listeners
 		rightJoystick = new Joystick(0);
-		// leftJoystick = new Joystick(1);
-
 		listenerRight = new ListenerManager(rightJoystick);
-		// listenerLeft = new ListenerManager(new Joystick(3));
 		addListenerManager(listenerRight);
-		// addListenerManager(listenerLeft);
 	}
 
 	@Override
