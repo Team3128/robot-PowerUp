@@ -1,8 +1,15 @@
 /*
  * Created By: Adham Elarabawy
- * Date: 1/8/2018
+
+ * Date: 1/12/2018
  * Description: Setup teleop and autonomous(100 in drive) modes for 2018 PreBot for testing purposes
  *
+ *
+ * Barely Edited with Minimal Effort, by: Aiden Zhang
+ * 
+ * Date: Doesn't Matter
+ * Description: Removed 2 motors. Fixed trash formatting and naming created by Dad. The end.
+ * 
  */
 
 package org.team3128.main;
@@ -30,14 +37,15 @@ public class MainPowerUp extends NarwhalRobot {
 	// Drive Train
 	public double wheelDiameter;
 	public SRXTankDrive drive;
-	public TalonSRX leftDrive1, leftDrive2, leftDrive3;
-	public TalonSRX rightDrive1, rightDrive2, rightDrive3;
+	public TalonSRX leftDrive1, leftDrive2;
+	public TalonSRX rightDrive1, rightDrive2;
 	private boolean fullSpeed = false;
 
 	// Controls
 	public ListenerManager listenerRight;
 	public ListenerManager listenerLeft;
 
+	public Joystick leftJoystick;
 	public Joystick rightJoystick;
 
 	// Misc(general)
@@ -62,39 +70,48 @@ public class MainPowerUp extends NarwhalRobot {
 		rightDrive2.set(ControlMode.Follower, rightDrive1.getDeviceID());
 
 		// create SRXTankDrive
-		drive = new SRXTankDrive(leftDrive1, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in,
-				30.5 * Length.in, 400);
+		drive = new SRXTankDrive(leftDrive1, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
 
 		// instantiate PDP
 		powerDistPanel = new PowerDistributionPanel();
 
 		// set Listeners
-		rightJoystick = new Joystick(0);
+		leftJoystick = new Joystick(0);
+		listenerLeft = new ListenerManager(leftJoystick);
+		addListenerManager(listenerLeft);
+		
+		rightJoystick = new Joystick(1);
 		listenerRight = new ListenerManager(rightJoystick);
 		addListenerManager(listenerRight);
+		
 	}
 
 	@Override
 	protected void setupListeners() {
+		
 		listenerRight.nameControl(ControllerExtreme3D.JOYX, "moveX");
 		listenerRight.nameControl(ControllerExtreme3D.TWIST, "moveTurn");
 		listenerRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
 		listenerRight.nameControl(new Button(1), "fullSpeed");
-		Log.info("MainPreBot", "controllers named");
+		
+		Log.info("MainPreBot", "Controllers Named");
 
 		listenerRight.addMultiListener(() -> {
-			Log.info("MainPreBot", "multi listener entered");
+			Log.info("MainPreBot", "Multi Listener Entered");
 			double x = listenerRight.getAxis("moveX");
 			double y = listenerRight.getAxis("moveTurn");
 			double t = listenerRight.getAxis("Throttle") * -1;
 			
-			drive.arcadeDrive(x,y, t, true);
+			drive.arcadeDrive(x, y, t, true);
 		}, "moveX", "moveTurn", "Throttle", "fullSpeed");
 
 		listenerRight.addButtonDownListener("fullSpeed", this::switchFullSpeed);
+	
 	}
 
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser) {
+		
+		// empty
 		
 	}
 
@@ -113,6 +130,8 @@ public class MainPowerUp extends NarwhalRobot {
 	}
 
 	public void switchFullSpeed() {
+		
 		fullSpeed = !fullSpeed;
+	
 	}
 }
