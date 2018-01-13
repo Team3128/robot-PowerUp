@@ -2,8 +2,20 @@ package org.team3128.mechanisms;
 
 import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.listener.POVValue;
+import org.team3128.common.util.Constants;
+
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
+
+/**
+ * Control system for the intake mechanism V.1
+ * 
+ * @author Eli, Adham
+ * 
+ */
 
 public class Intake {
 	public enum State {
@@ -25,14 +37,17 @@ public class Intake {
 
 	}
 
-	private MotorGroup rollers;
+	VictorSPX leader;
+	VictorSPX follower;
 	private DigitalInput limSwitch;
 	private State state;
 
-	public Intake(MotorGroup rollers, DigitalInput limSwitch, State state) {
-		this.rollers = rollers;
+	public Intake(VictorSPX leader, VictorSPX follower, DigitalInput limSwitch, State state) {
+		this.leader = leader;
+		this.follower = follower;
 		this.limSwitch = limSwitch;
 		this.state = state;
+		follower.set(ControlMode.Follower, leader.getDeviceID());
 	}
 
 	public void onPOVUpdate(POVValue newValue) {
@@ -54,7 +69,7 @@ public class Intake {
 	}
 
 	public void setState(State newState) {
-		rollers.setTarget(newState.getRollerPower());
+		leader.set(ControlMode.Velocity, newState.getRollerPower());
 		state = newState;
 	}
 
@@ -64,7 +79,7 @@ public class Intake {
 
 	public void setIntake() {
 		if (state.getRollerPower() < 0 && limSwitch.get() == true) {
-			rollers.setTarget(0);
+			leader.set(ControlMode.Velocity, 0);
 		}
 	}
 
