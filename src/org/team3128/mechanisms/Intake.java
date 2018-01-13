@@ -1,11 +1,8 @@
 package org.team3128.mechanisms;
 
-import org.team3128.common.hardware.motor.MotorGroup;
 import org.team3128.common.listener.POVValue;
-import org.team3128.common.util.Constants;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -22,7 +19,8 @@ public class Intake {
 		STOPPED(0), INTAKE(1), OUTTAKE(-1);
 
 		private double rollerPower;
-
+		
+		//enum constructor
 		private State(double rollerPower) {
 			this.setRollerPower(rollerPower);
 		}
@@ -42,6 +40,7 @@ public class Intake {
 	private DigitalInput limSwitch;
 	private State state;
 
+	//constructor
 	public Intake(VictorSPX leader, VictorSPX follower, DigitalInput limSwitch, State state) {
 		this.leader = leader;
 		this.follower = follower;
@@ -50,6 +49,7 @@ public class Intake {
 		follower.set(ControlMode.Follower, leader.getDeviceID());
 	}
 
+	//set state based on POV position from joy-stick
 	public void onPOVUpdate(POVValue newValue) {
 		switch (newValue.getDirectionValue()) {
 		case 0:
@@ -67,7 +67,7 @@ public class Intake {
 			break;
 		}
 	}
-
+	
 	public void setState(State newState) {
 		leader.set(ControlMode.Velocity, newState.getRollerPower());
 		state = newState;
@@ -78,7 +78,8 @@ public class Intake {
 	}
 
 	public void setIntake() {
-		if (state.getRollerPower() < 0 && limSwitch.get() == true) {
+		//if intake mode and the limit switch is activated(meaningblock is in right position), then stop intake
+		if (state.getRollerPower() > 0 && limSwitch.get() == true) {
 			leader.set(ControlMode.Velocity, 0);
 		}
 	}

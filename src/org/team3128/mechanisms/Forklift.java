@@ -12,15 +12,20 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Encoder;
 
 /**
- * Control system for the forklift mechanism V.1
+ * Control system for the fork-lift mechanism V.1
  * 
  * @author Eli, Adham
  * 
  */
 
 public class Forklift {
+	//constant to multiple encoder values to get accurate measurements
 	final double constant = 6;
+	
+	//max height
 	final double stallHeight = 8 * Length.ft;
+	
+	//predetermined fork-lift heights
 	private static double groundHeight = 0 * Length.ft;
 	private static double switchHeight = 3 * Length.ft;
 	private static double scaleHeight = 8 * Length.ft;
@@ -53,7 +58,7 @@ public class Forklift {
 		// set leader feedback device
 		leader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
 
-		// set Follower
+		// set follower
 		follower.set(ControlMode.Follower, leader.getDeviceID());
 
 	}
@@ -63,11 +68,12 @@ public class Forklift {
 		depositCubeThread.start();
 		depositCubeThread = new Thread(() -> {
 			while (true) {
+				//if limit switch ISN'T clicked, AND actual fork-lift height is less than the target then... set target position from parameter
 				if (!limSwitch.get() && leader.getSelectedSensorPosition(0) <= stallHeight + 3 * Length.in) {
 					leader.set(ControlMode.Position, state.targetHeight);
-
-					if (heightState.targetHeight >= leader.getSelectedSensorPosition(0) * constant - 3 * Length.in
-							&& limSwitch.get() == false) {
+					
+					//if forklift has reached target height, then... set the intake based on parameter and stop while loop
+					if (heightState.targetHeight >= leader.getSelectedSensorPosition(0) * constant - 3 * Length.in && limSwitch.get() == false) {
 						intake.setState(intakeState);
 						break;
 					}

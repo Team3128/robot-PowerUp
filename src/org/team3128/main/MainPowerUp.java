@@ -34,6 +34,7 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class MainPowerUp extends NarwhalRobot {
+	
 	// Drive Train
 	public double wheelDiameter;
 	public SRXTankDrive drive;
@@ -88,14 +89,16 @@ public class MainPowerUp extends NarwhalRobot {
 
 	@Override
 	protected void setupListeners() {
-		
+		//name controls
 		listenerRight.nameControl(ControllerExtreme3D.JOYX, "moveX");
 		listenerRight.nameControl(ControllerExtreme3D.TWIST, "moveTurn");
 		listenerRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
 		listenerRight.nameControl(new Button(1), "fullSpeed");
 		
+		//debug
 		Log.info("MainPreBot", "Controllers Named");
 
+		//get Joy-stick data
 		listenerRight.addMultiListener(() -> {
 			Log.info("MainPreBot", "Multi Listener Entered");
 			double x = listenerRight.getAxis("moveX");
@@ -110,28 +113,23 @@ public class MainPowerUp extends NarwhalRobot {
 	}
 
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser) {
-		
 		// empty
-		
 	}
 
 	@Override
 	protected void teleopInit() {
-		// set full speed to true
+		// set fullSpeed to true
 		fullSpeed = true;
-
 	}
 
 	@Override
 	protected void autonomousInit() {
-		// set full speed to false
+		// set fullSpeed to false
 		fullSpeed = false;
-
 	}
 
 	public void switchFullSpeed() {
-		
+		//switch fullSpeed
 		fullSpeed = !fullSpeed;
-	
 	}
 }
