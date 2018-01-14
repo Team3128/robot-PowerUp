@@ -39,7 +39,7 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
-public class MainGuidoPractice extends NarwhalRobot {
+public class MainGuido extends NarwhalRobot {
 	
 	// Drive Train
 	public double wheelDiameter;

@@ -14,6 +14,11 @@
 
 package org.team3128.main;
 
+import org.team3128.autonomous.CalibrateRunPID;
+import org.team3128.autonomous.AutoPlaceBlockSwitch_Left;
+import org.team3128.mechanisms.Forklift;
+import org.team3128.mechanisms.Intake;
+import org.team3128.mechanisms.Forklift.State;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.listener.ListenerManager;
@@ -28,6 +33,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
@@ -41,7 +47,13 @@ public class MainGuidoCompetition extends NarwhalRobot {
 	public TalonSRX leftDrive1, leftDrive2;
 	public TalonSRX rightDrive1, rightDrive2;
 	private boolean fullSpeed = false;
-
+	
+	// Forklift
+	Forklift forklift;
+	public TalonSRX leader, follower;
+	DigitalInput forkLimSwitch;
+	Intake intake;
+	
 	// Controls
 	public ListenerManager listenerRight;
 	public ListenerManager listenerLeft;
@@ -72,6 +84,9 @@ public class MainGuidoCompetition extends NarwhalRobot {
 
 		// create SRXTankDrive
 		drive = new SRXTankDrive(leftDrive1, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
+		
+		// create forklift
+		forklift = new Forklift(Forklift.State.GROUND, intake, leader, follower, forkLimSwitch);
 
 		// instantiate PDP
 		powerDistPanel = new PowerDistributionPanel();
@@ -96,7 +111,7 @@ public class MainGuidoCompetition extends NarwhalRobot {
 		listenerRight.nameControl(new Button(1), "fullSpeed");
 		
 		//debug
-		Log.info("MainPreBot", "Controllers Named");
+		Log.info("MainGuido", "Controllers Named");
 
 		//get Joy-stick data
 		listenerRight.addMultiListener(() -> {
@@ -113,7 +128,9 @@ public class MainGuidoCompetition extends NarwhalRobot {
 	}
 
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser) {
-		// empty
+		programChooser.addDefault("None", null);
+		programChooser.addObject("Calibrate PID", new CalibrateRunPID(drive));
+		programChooser.addObject("[Left] Switch Block", new AutoPlaceBlockSwitch_Left(drive, forklift));
 	}
 
 	@Override
