@@ -15,13 +15,13 @@ import edu.wpi.first.wpilibj.DigitalInput;
  */
 
 public class Intake {
-	public enum State {
+	public enum intakeState {
 		STOPPED(0), INTAKE(1), OUTTAKE(-1);
 
 		private double rollerPower;
 		
 		//enum constructor
-		private State(double rollerPower) {
+		private intakeState(double rollerPower) {
 			this.setRollerPower(rollerPower);
 		}
 
@@ -38,10 +38,10 @@ public class Intake {
 	VictorSPX leader;
 	VictorSPX follower;
 	private DigitalInput limSwitch;
-	private State state;
+	private intakeState state;
 
 	//constructor
-	public Intake(VictorSPX leader, VictorSPX follower, DigitalInput limSwitch, State state) {
+	public Intake(VictorSPX leader, VictorSPX follower, DigitalInput limSwitch, intakeState state) {
 		this.leader = leader;
 		this.follower = follower;
 		this.limSwitch = limSwitch;
@@ -53,27 +53,27 @@ public class Intake {
 	public void onPOVUpdate(POVValue newValue) {
 		switch (newValue.getDirectionValue()) {
 		case 0:
-			setState(State.STOPPED);
+			setState(intakeState.STOPPED);
 			break;
 		case 1:
 		case 2:
 		case 8:
-			setState(State.OUTTAKE);
+			setState(intakeState.OUTTAKE);
 			break;
 		case 4:
 		case 5:
 		case 6:
-			setState(State.INTAKE);
+			setState(intakeState.INTAKE);
 			break;
 		}
 	}
 	
-	public void setState(State newState) {
+	public void setState(intakeState newState) {
 		leader.set(ControlMode.Velocity, newState.getRollerPower());
 		state = newState;
 	}
 
-	public State getState() {
+	public intakeState getState() {
 		return state;
 	}
 
