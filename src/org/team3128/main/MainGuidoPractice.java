@@ -33,7 +33,9 @@ import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
-public class MainPowerUp extends NarwhalRobot {
+import org.team3128.autonomous.CalibrateRunPID;
+
+public class MainGuidoPractice extends NarwhalRobot {
 	
 	// Drive Train
 	public double wheelDiameter;
@@ -113,7 +115,8 @@ public class MainPowerUp extends NarwhalRobot {
 	}
 
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser) {
-		// empty
+		programChooser.addDefault("None", null);
+		programChooser.addObject("Calibrate PID", new CalibrateRunPID(this));
 	}
 
 	@Override
