@@ -1,6 +1,8 @@
 /*
  * Created By: Adham Elarabawy
+   Edited By: Eli Smith
 
+    
  * Date: 1/12/2018
  * Description: Setup teleop and autonomous(100 in drive) modes for 2018 PreBot for testing purposes
  *
@@ -46,7 +48,7 @@ public class MainGuido extends NarwhalRobot {
 	public SRXTankDrive drive;
 	public TalonSRX leftDrive1, leftDrive2;
 	public TalonSRX rightDrive1, rightDrive2;
-	private boolean fullSpeed = false;
+	public boolean fullSpeed = false;
 	
 	// Forklift
 	Forklift forklift;

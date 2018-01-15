@@ -32,7 +32,7 @@ public class Forklift {
 	private static double switchHeight = 3 * Length.ft;
 	private static double scaleHeight = 8 * Length.ft;
 	
-	private static intakeState intakeS;
+	private static intakeState intakeState;
 
 	public enum State {
 
@@ -73,7 +73,7 @@ public class Forklift {
 					
 					//if forklift has reached target height, then... set the intake based on parameter and stop while loop
 					if (state.targetHeight >= leader.getSelectedSensorPosition(0) * constant - 3 * Length.in && limSwitch.get() == false) {
-						intake.setState(intakeS);
+						intake.setState(intakeState);
 						break;
 					}
 				}
@@ -91,7 +91,7 @@ public class Forklift {
 	
 	public void setState(State heightState, intakeState intState) {
 		state = heightState;
-		intakeS = intState;
+		intakeState = intState;
 		
 		/*
 		depositCubeThread.start();
@@ -145,7 +145,7 @@ public class Forklift {
 		{
 
 		}
-
+ 
 		@Override
 		protected void end()
 		{
@@ -167,7 +167,7 @@ public class Forklift {
 		{
 			
 			Log.debug("Forklift and Intake",
-					"Task completed6.");
+					"Task completed.");
 			return false;
 			//return isTimedOut();
 			
