@@ -21,17 +21,17 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 
 public class Forklift {
-	//constant to multiple encoder values to get accurate measurements
+	// constant to multiple encoder values to get accurate measurements
 	final double constant = 6;
-	
-	//max height
+
+	// max height
 	final double stallHeight = 8 * Length.ft;
-	
-	//predetermined fork-lift heights
+
+	// predetermined fork-lift heights
 	private static double groundHeight = 0 * Length.ft;
 	private static double switchHeight = 3 * Length.ft;
 	private static double scaleHeight = 8 * Length.ft;
-	
+
 	private static intakeState intakeState;
 
 	public enum State {
@@ -67,12 +67,16 @@ public class Forklift {
 
 		depositCubeThread = new Thread(() -> {
 			while (true) {
-				//if limit switch ISN'T clicked, AND actual fork-lift height is less than the target then... set target position from parameter
+				// if limit switch ISN'T clicked, AND actual fork-lift height is less than the
+				// target then...
+				// set target position from parameter
 				if (!limSwitch.get() && leader.getSelectedSensorPosition(0) <= stallHeight + 3 * Length.in) {
 					leader.set(ControlMode.Position, state.targetHeight);
-					
-					//if forklift has reached target height, then... set the intake based on parameter and stop while loop
-					if (state.targetHeight >= leader.getSelectedSensorPosition(0) * constant - 3 * Length.in && limSwitch.get() == false) {
+
+					// if forklift has reached target height,
+					// then... set the intake based on parameter and stop while loop
+					if (state.targetHeight >= leader.getSelectedSensorPosition(0) * constant - 3 * Length.in
+							&& limSwitch.get() == false) {
 						intake.setState(intakeState);
 						break;
 					}
@@ -83,95 +87,48 @@ public class Forklift {
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
-
 			}
-
 		});
 	}
-	
+
 	public void setState(State heightState, intakeState intState) {
 		state = heightState;
 		intakeState = intState;
-		
-		/*
-		depositCubeThread.start();
-		depositCubeThread = new Thread(() -> {
-			while (true) {
-				//if limit switch ISN'T clicked, AND actual fork-lift height is less than the target then... set target position from parameter
-				if (!limSwitch.get() && leader.getSelectedSensorPosition(0) <= stallHeight + 3 * Length.in) {
-					leader.set(ControlMode.Position, state.targetHeight);
-					
-					//if forklift has reached target height, then... set the intake based on parameter and stop while loop
-					if (heightState.targetHeight >= leader.getSelectedSensorPosition(0) * constant - 3 * Length.in && limSwitch.get() == false) {
-						intake.setState(intakeState);
-						break;
-					}
-				}
-
-				try {
-					Thread.sleep(100);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-
-			}
-		});
-		*/
 	}
-	
-	public class CmdForkliftPush extends Command
-	{
+
+	public class CmdForkliftPush extends Command {
 
 		public CmdForkliftPush(State heightState, intakeState intState) {
-			
 			setState(heightState, intState);
-			
 		}
-		
+
 		@Override
-		protected void initialize()
-		{
-
-			//setState(tempHeightState, tempIntState);
-
-			Log.debug("Forklift and Intake",
-					"Changing state to ... ");
-			
+		protected void initialize() {
+			// setState(tempHeightState, tempIntState);
+			Log.debug("Forklift and Intake", "Changing state to ... ");
 		}
-		
+
 		/*
-		@Override
-		protected void execute()
-		{
+		 * @Override protected void execute() {
+		 * 
+		 * }
+		 * 
+		 * @Override protected void end() {
+		 * 
+		 * }
+		 */
 
-		}
- 
 		@Override
-		protected void end()
-		{
-
-		}
-		*/
-		
-		@Override
-		protected void interrupted()
-		{
-			
-			Log.debug("Forklift and Intake",
-					"Ending, was interrupted.");
+		protected void interrupted() {
+			Log.debug("Forklift and Intake", "Ending, was interrupted.");
 			end();
 		}
-		
+
 		@Override
-		protected boolean isFinished()
-		{
-			
-			Log.debug("Forklift and Intake",
-					"Task completed.");
+		protected boolean isFinished() {
+			Log.debug("Forklift and Intake", "Task completed.");
 			return false;
-			//return isTimedOut();
-			
+			// return isTimedOut();
 		}
-		
 	}
 }

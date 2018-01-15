@@ -10,7 +10,7 @@ import org.team3128.mechanisms.Forklift;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
-public class AutoPlaceBlockSwitch extends CommandGroup {
+public class AutoValues extends CommandGroup {
 	final double switchDistance = 168 * Length.in; // vertical distance between startPos and switch
 	final double horizOffset = 55.56 * Length.in; // distance between start position horizontal and switch horizontal
 	final double switchWidth = 100 * Length.in; // width of the switch

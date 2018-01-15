@@ -15,7 +15,7 @@ import org.team3128.mechanisms.Intake;
 public class AutoPlaceBlockSwitch_Right extends CommandGroup {
 	public AutoPlaceBlockSwitch_Right(SRXTankDrive drive, Forklift forklift) {
 
-		AutoPlaceBlockSwitch autoValues = new AutoPlaceBlockSwitch();
+		AutoValues autoValues = new AutoValues();
 		
 		final double switchDistance = autoValues.switchDistance; // vertical distance between startPos and switch
 		final double horizOffset = autoValues.horizOffset; // distance between start position horizontal and switch horizontal

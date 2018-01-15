@@ -1,16 +1,7 @@
 /*
- * Created By: Adham Elarabawy
-   Edited By: Eli Smith
-
  * Date: 1/12/2018
- * Description: Setup teleop and autonomous(100 in drive) modes for 2018 PreBot for testing purposes
+ * Description: Setup teleop/auto modes for testing purposes
  *
- *
- * Barely Edited with Minimal Effort, by: Aiden Zhang
- * 
- * Date: Doesn't Matter
- * Description: Removed 2 motors. Fixed trash formatting and naming created by Dad. The end.
- * 
  */
 
 package org.team3128.main;
