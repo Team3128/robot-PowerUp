@@ -1,7 +1,7 @@
 /*
  *     
  * Date: 1/12/2018
- * Description: Setup teleop and autonomous(100 in drive) modes for 2018 PreBot for testing purposes
+ * Description: Setup teleop and autonomous modes for 2018 MainGuido for testing purposes
  *
  * 
  */
@@ -12,6 +12,7 @@ import org.team3128.autonomous.CalibrateRunPID;
 import org.team3128.autonomous.AutoPlaceBlockSwitch_Left;
 import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Intake;
+import org.team3128.mechanisms.Intake.intakeState;
 import org.team3128.mechanisms.Forklift.State;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
@@ -26,6 +27,7 @@ import org.team3128.common.util.units.Length;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
@@ -44,9 +46,14 @@ public class MainGuido extends NarwhalRobot {
 	
 	// Forklift
 	Forklift forklift;
-	public TalonSRX leader, follower;
+	public TalonSRX forkliftSRX1, forkliftSRX2;
 	DigitalInput forkLimSwitch;
+		
+	// Intake
 	Intake intake;
+	intakeState intakeState;
+	public VictorSPX intakeSPX1, intakeSPX2;
+	DigitalInput intakeLimSwitch;
 	
 	// Controls
 	public ListenerManager listenerRight;
@@ -61,12 +68,15 @@ public class MainGuido extends NarwhalRobot {
 	@Override
 	protected void constructHardware() {
 		// Drive Train Setup
-		leftDrive1 = new TalonSRX(1);
-		leftDrive2 = new TalonSRX(2);
-		rightDrive1 = new TalonSRX(3);
-		rightDrive2 = new TalonSRX(4);
+		leftDrive1 = new TalonSRX(20);
+		leftDrive2 = new TalonSRX(21);
+		rightDrive1 = new TalonSRX(10);
+		rightDrive2 = new TalonSRX(11);
 		
-		rightDrive1.setInverted(true);
+		//rightDrive1.setInverted(false);
+		//rightDrive2.setInverted(false);
+		//leftDrive1.setInverted(true);
+		//leftDrive2.setInverted(true);
 
 		// set Leaders
 		leftDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
@@ -79,18 +89,30 @@ public class MainGuido extends NarwhalRobot {
 		// create SRXTankDrive
 		drive = new SRXTankDrive(leftDrive1, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
 		
+		/*
+		// create intake
+		intakeState = Intake.intakeState.STOPPED;
+		intakeSPX1 = new VictorSPX(1);
+		intakeSPX2 = new VictorSPX(2);
+		intakeLimSwitch = new DigitalInput(2); //random channel
+		intake = new Intake(intakeSPX1, intakeSPX2, intakeLimSwitch, intakeState);
+		
 		// create forklift
-		forklift = new Forklift(Forklift.State.GROUND, intake, leader, follower, forkLimSwitch);
-
+		forkliftSRX1 = new TalonSRX(30);
+		forkliftSRX2 = new TalonSRX(31);
+		forkLimSwitch = new DigitalInput(1); //random chanel
+		forklift = new Forklift(Forklift.State.GROUND, intake, forkliftSRX1, forkliftSRX2, forkLimSwitch);
+		*/
+		
 		// instantiate PDP
 		powerDistPanel = new PowerDistributionPanel();
 
 		// set Listeners
-		leftJoystick = new Joystick(0);
+		leftJoystick = new Joystick(1);
 		listenerLeft = new ListenerManager(leftJoystick);
 		addListenerManager(listenerLeft);
 		
-		rightJoystick = new Joystick(1);
+		rightJoystick = new Joystick(0);
 		listenerRight = new ListenerManager(rightJoystick);
 		addListenerManager(listenerRight);
 		
@@ -99,7 +121,7 @@ public class MainGuido extends NarwhalRobot {
 	@Override
 	protected void setupListeners() {
 		//name controls
-		listenerRight.nameControl(ControllerExtreme3D.JOYX, "moveX");
+		listenerRight.nameControl(ControllerExtreme3D.JOYY, "moveForwards");
 		listenerRight.nameControl(ControllerExtreme3D.TWIST, "moveTurn");
 		listenerRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
 		listenerRight.nameControl(new Button(1), "fullSpeed");
@@ -109,13 +131,13 @@ public class MainGuido extends NarwhalRobot {
 
 		//get Joy-stick data
 		listenerRight.addMultiListener(() -> {
-			Log.info("MainPreBot", "Multi Listener Entered");
-			double x = listenerRight.getAxis("moveX");
+			Log.info("MainGuido", "Multi Listener Entered");
+			double x = listenerRight.getAxis("moveForwards");
 			double y = listenerRight.getAxis("moveTurn");
 			double t = listenerRight.getAxis("Throttle") * -1;
 			
 			drive.arcadeDrive(x, y, t, true);
-		}, "moveX", "moveTurn", "Throttle", "fullSpeed");
+		}, "moveForwards", "moveTurn", "Throttle", "fullSpeed");
 
 		listenerRight.addButtonDownListener("fullSpeed", this::switchFullSpeed);
 	
@@ -124,7 +146,7 @@ public class MainGuido extends NarwhalRobot {
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser) {
 		programChooser.addDefault("None", null);
 		programChooser.addObject("Calibrate PID", new CalibrateRunPID(drive));
-		programChooser.addObject("[Left] Switch Block", new AutoPlaceBlockSwitch_Left(drive, forklift));
+		//programChooser.addObject("[Left] Switch Block", new AutoPlaceBlockSwitch_Left(drive, forklift));
 	}
 
 	@Override
