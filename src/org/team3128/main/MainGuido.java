@@ -9,20 +9,19 @@
 package org.team3128.main;
 
 import org.team3128.autonomous.CalibrateRunPID;
-import org.team3128.autonomous.AutoPlaceBlockSwitch_Left;
-import org.team3128.mechanisms.Forklift;
-import org.team3128.mechanisms.Intake;
-import org.team3128.mechanisms.Intake.intakeState;
-import org.team3128.mechanisms.Forklift.State;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
+import org.team3128.common.hardware.misc.Piston;
+import org.team3128.common.hardware.misc.TwoSpeedGearshift;
 import org.team3128.common.listener.ListenerManager;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
-import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.units.Length;
+import org.team3128.mechanisms.Forklift;
+import org.team3128.mechanisms.Intake;
+import org.team3128.mechanisms.Intake.intakeState;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -42,7 +41,9 @@ public class MainGuido extends NarwhalRobot {
 	public SRXTankDrive drive;
 	public TalonSRX leftDrive1, leftDrive2;
 	public TalonSRX rightDrive1, rightDrive2;
-	public boolean fullSpeed = false;
+	
+	public TwoSpeedGearshift gearshift;
+	public Piston gearshiftPiston;
 	
 	// Forklift
 	Forklift forklift;
@@ -89,6 +90,9 @@ public class MainGuido extends NarwhalRobot {
 		// create SRXTankDrive
 		drive = new SRXTankDrive(leftDrive1, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
 		
+		gearshiftPiston = new Piston(0, 1);
+		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
+		
 		/*
 		// create intake
 		intakeState = Intake.intakeState.STOPPED;
@@ -124,7 +128,6 @@ public class MainGuido extends NarwhalRobot {
 		listenerRight.nameControl(ControllerExtreme3D.JOYY, "moveForwards");
 		listenerRight.nameControl(ControllerExtreme3D.TWIST, "moveTurn");
 		listenerRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
-		listenerRight.nameControl(new Button(1), "fullSpeed");
 		
 		//debug
 		Log.info("MainGuido", "Controllers Named");
@@ -139,30 +142,23 @@ public class MainGuido extends NarwhalRobot {
 			drive.arcadeDrive(x, y, t, true);
 		}, "moveForwards", "moveTurn", "Throttle", "fullSpeed");
 
-		listenerRight.addButtonDownListener("fullSpeed", this::switchFullSpeed);
-	
-	}
 
-	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser) {
-		programChooser.addDefault("None", null);
-		programChooser.addObject("Calibrate PID", new CalibrateRunPID(drive));
-		//programChooser.addObject("[Left] Switch Block", new AutoPlaceBlockSwitch_Left(drive, forklift));
+		listenerLeft.nameControl(new Button(11), "ClearStickyFaults");
+		listenerLeft.addButtonDownListener("StickyFaults", () -> {
+			
+		});
 	}
 
 	@Override
-	protected void teleopInit() {
-		// set fullSpeed to true
-		fullSpeed = true;
+	protected void teleopInit()
+	{
+		// TODO Auto-generated method stub
+		
 	}
 
 	@Override
-	protected void autonomousInit() {
-		// set fullSpeed to false
-		fullSpeed = false;
+	protected void autonomousInit()
+	{
+		// TODO Auto-generated method stub
+		
 	}
-
-	public void switchFullSpeed() {
-		//switch fullSpeed
-		fullSpeed = !fullSpeed;
-	}
-}
