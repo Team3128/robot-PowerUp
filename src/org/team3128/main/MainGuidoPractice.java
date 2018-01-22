@@ -6,28 +6,6 @@
 
 package org.team3128.main;
 
-import org.team3128.autonomous.CalibrateRunPID;
-import org.team3128.autonomous.AutoPlaceBlockSwitch_Left;
-import org.team3128.mechanisms.Forklift;
-import org.team3128.mechanisms.Intake;
-import org.team3128.mechanisms.Forklift.State;
-import org.team3128.common.NarwhalRobot;
-import org.team3128.common.drive.SRXTankDrive;
-import org.team3128.common.listener.ListenerManager;
-import org.team3128.common.listener.controllers.ControllerExtreme3D;
-import org.team3128.common.listener.controltypes.Button;
-import org.team3128.common.util.Constants;
-import org.team3128.common.util.Log;
-import org.team3128.common.util.datatypes.PIDConstants;
-import org.team3128.common.util.units.Length;
-
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-
-import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
@@ -59,9 +37,5 @@ public class MainGuidoPractice extends MainGuido {
 	@Override
 	protected void autonomousInit() {
 		super.autonomousInit();
-	}
-
-	public void switchFullSpeed() {
-		super.switchFullSpeed();
 	}
 }

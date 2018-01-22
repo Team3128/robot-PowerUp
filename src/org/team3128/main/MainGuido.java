@@ -8,7 +8,6 @@
 
 package org.team3128.main;
 
-import org.team3128.autonomous.CalibrateRunPID;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -31,8 +30,6 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
-import edu.wpi.first.wpilibj.command.CommandGroup;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class MainGuido extends NarwhalRobot {
 	
@@ -65,7 +62,9 @@ public class MainGuido extends NarwhalRobot {
 
 	// Misc(general)
 	public PowerDistributionPanel powerDistPanel;
-
+	public double shiftUpSpeed = 100;
+	public double shiftDownSpeed = 200;
+	
 	@Override
 	protected void constructHardware() {
 		// Drive Train Setup
@@ -92,6 +91,8 @@ public class MainGuido extends NarwhalRobot {
 		
 		gearshiftPiston = new Piston(0, 1);
 		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
+		
+		drive.addShifter(gearshift, shiftUpSpeed, shiftDownSpeed);
 		
 		/*
 		// create intake
@@ -162,3 +163,4 @@ public class MainGuido extends NarwhalRobot {
 		// TODO Auto-generated method stub
 		
 	}
+}
