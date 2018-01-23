@@ -12,6 +12,8 @@ import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.misc.TwoSpeedGearshift;
+import org.team3128.common.hardware.motor.NarwhalSRX;
+import org.team3128.common.hardware.motor.NarwhalSRX.Reverse;
 import org.team3128.common.listener.ListenerManager;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
@@ -36,8 +38,8 @@ public class MainGuido extends NarwhalRobot {
 	// Drive Train
 	public double wheelDiameter;
 	public SRXTankDrive drive;
-	public TalonSRX leftDrive1, leftDrive2;
-	public TalonSRX rightDrive1, rightDrive2;
+	public NarwhalSRX leftDriveLeader, leftDriveFollower;
+	public NarwhalSRX rightDrive1, rightDrive2;
 	
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPiston;
@@ -68,10 +70,10 @@ public class MainGuido extends NarwhalRobot {
 	@Override
 	protected void constructHardware() {
 		// Drive Train Setup
-		leftDrive1 = new TalonSRX(20);
-		leftDrive2 = new TalonSRX(21);
-		rightDrive1 = new TalonSRX(10);
-		rightDrive2 = new TalonSRX(11);
+		leftDriveLeader = new NarwhalSRX(20, Reverse.NONE, Reverse.NONE);
+		leftDriveFollower = new NarwhalSRX(21, Reverse.NONE, Reverse.NONE);
+		rightDrive1 = new NarwhalSRX(10, Reverse.NONE, Reverse.NONE);
+		rightDrive2 = new NarwhalSRX(11, Reverse.NONE, Reverse.NONE);
 		
 		//rightDrive1.setInverted(false);
 		//rightDrive2.setInverted(false);
@@ -79,15 +81,15 @@ public class MainGuido extends NarwhalRobot {
 		//leftDrive2.setInverted(true);
 
 		// set Leaders
-		leftDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
+		leftDriveLeader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
 		rightDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
 
 		// set Followers
-		leftDrive2.set(ControlMode.Follower, leftDrive1.getDeviceID());
+		leftDriveFollower.set(ControlMode.Follower, leftDriveLeader.getDeviceID());
 		rightDrive2.set(ControlMode.Follower, rightDrive1.getDeviceID());
 
 		// create SRXTankDrive
-		drive = new SRXTankDrive(leftDrive1, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
+		drive = new SRXTankDrive(leftDriveLeader, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
 		
 		gearshiftPiston = new Piston(0, 1);
 		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
@@ -141,11 +143,11 @@ public class MainGuido extends NarwhalRobot {
 			double t = listenerRight.getAxis("Throttle") * -1;
 			
 			drive.arcadeDrive(x, y, t, true);
-		}, "moveForwards", "moveTurn", "Throttle", "fullSpeed");
+		}, "moveForwards", "moveTurn", "Throttle");
 
 
 		listenerLeft.nameControl(new Button(11), "ClearStickyFaults");
-		listenerLeft.addButtonDownListener("StickyFaults", () -> {
+		listenerLeft.addButtonDownListener("ClearStickyFaults", () -> {
 			
 		});
 	}
