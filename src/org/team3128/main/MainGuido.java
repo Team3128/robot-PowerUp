@@ -8,6 +8,7 @@
 
 package org.team3128.main;
 
+import org.team3128.autonomous.CalibrateRunPID;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -32,6 +33,8 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.command.CommandGroup;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
 public class MainGuido extends NarwhalRobot {
 	
@@ -39,7 +42,7 @@ public class MainGuido extends NarwhalRobot {
 	public double wheelDiameter;
 	public SRXTankDrive drive;
 	public NarwhalSRX leftDriveLeader, leftDriveFollower;
-	public NarwhalSRX rightDrive1, rightDrive2;
+	public NarwhalSRX rightDriveLeader, rightDriveFollower;
 	
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPiston;
@@ -72,8 +75,8 @@ public class MainGuido extends NarwhalRobot {
 		// Drive Train Setup
 		leftDriveLeader = new NarwhalSRX(20, Reverse.NONE, Reverse.NONE);
 		leftDriveFollower = new NarwhalSRX(21, Reverse.NONE, Reverse.NONE);
-		rightDrive1 = new NarwhalSRX(10, Reverse.NONE, Reverse.NONE);
-		rightDrive2 = new NarwhalSRX(11, Reverse.NONE, Reverse.NONE);
+		rightDriveLeader = new NarwhalSRX(10, Reverse.NONE, Reverse.OUTPUT);
+		rightDriveFollower = new NarwhalSRX(11, Reverse.NONE, Reverse.NONE);
 		
 		//rightDrive1.setInverted(false);
 		//rightDrive2.setInverted(false);
@@ -82,14 +85,14 @@ public class MainGuido extends NarwhalRobot {
 
 		// set Leaders
 		leftDriveLeader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
-		rightDrive1.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
+		rightDriveLeader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
 
 		// set Followers
 		leftDriveFollower.set(ControlMode.Follower, leftDriveLeader.getDeviceID());
-		rightDrive2.set(ControlMode.Follower, rightDrive1.getDeviceID());
+		rightDriveFollower.set(ControlMode.Follower, rightDriveLeader.getDeviceID());
 
 		// create SRXTankDrive
-		drive = new SRXTankDrive(leftDriveLeader, rightDrive1, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
+		drive = new SRXTankDrive(leftDriveLeader, rightDriveLeader, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
 		
 		gearshiftPiston = new Piston(0, 1);
 		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
@@ -150,6 +153,12 @@ public class MainGuido extends NarwhalRobot {
 		listenerLeft.addButtonDownListener("ClearStickyFaults", () -> {
 			
 		});
+	}
+
+	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser)
+	{
+		programChooser.addDefault("None", null);
+		programChooser.addObject("100 Inch Run", new CalibrateRunPID(drive));
 	}
 
 	@Override
