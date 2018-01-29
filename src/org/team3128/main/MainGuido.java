@@ -35,11 +35,12 @@ import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class MainGuido extends NarwhalRobot {
 	
 	// Drive Train
-	public double wheelDiameter;
+	public double wheelCirc = 12.68 * Length.in;
 	public SRXTankDrive drive;
 	public NarwhalSRX leftDriveLeader, leftDriveFollower;
 	public NarwhalSRX rightDriveLeader, rightDriveFollower;
@@ -73,10 +74,10 @@ public class MainGuido extends NarwhalRobot {
 	@Override
 	protected void constructHardware() {
 		// Drive Train Setup
-		leftDriveLeader = new NarwhalSRX(20, Reverse.NONE, Reverse.NONE);
-		leftDriveFollower = new NarwhalSRX(21, Reverse.NONE, Reverse.NONE);
-		rightDriveLeader = new NarwhalSRX(10, Reverse.NONE, Reverse.OUTPUT);
-		rightDriveFollower = new NarwhalSRX(11, Reverse.NONE, Reverse.NONE);
+		leftDriveLeader = new NarwhalSRX(20, Reverse.ENCODER, Reverse.NONE);
+		leftDriveFollower = new NarwhalSRX(21, Reverse.OUTPUT, Reverse.NONE);
+		rightDriveLeader = new NarwhalSRX(10, Reverse.BOTH, Reverse.OUTPUT);
+		rightDriveFollower = new NarwhalSRX(11, Reverse.OUTPUT, Reverse.NONE);
 		
 		//rightDrive1.setInverted(false);
 		//rightDrive2.setInverted(false);
@@ -92,7 +93,7 @@ public class MainGuido extends NarwhalRobot {
 		rightDriveFollower.set(ControlMode.Follower, rightDriveLeader.getDeviceID());
 
 		// create SRXTankDrive
-		drive = new SRXTankDrive(leftDriveLeader, rightDriveLeader, wheelDiameter * Math.PI, 1, 25.25 * Length.in, 30.5 * Length.in, 400);
+		drive = new SRXTankDrive(leftDriveLeader, rightDriveLeader, wheelCirc, 1, 25.25 * Length.in, 30.5 * Length.in, 3600);
 		
 		gearshiftPiston = new Piston(0, 1);
 		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
@@ -158,20 +159,36 @@ public class MainGuido extends NarwhalRobot {
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser)
 	{
 		programChooser.addDefault("None", null);
-		programChooser.addObject("100 Inch Run", new CalibrateRunPID(drive));
+		programChooser.addObject("100 Inch Run", new CalibrateRunPID(this));
 	}
 
 	@Override
 	protected void teleopInit()
 	{
-		// TODO Auto-generated method stub
+		leftDriveLeader.setSensorPhase(true);
 		
+		rightDriveLeader.setInverted(true);
+		rightDriveLeader.setSensorPhase(true);
+		
+		leftDriveLeader.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
 	}
 
 	@Override
 	protected void autonomousInit()
 	{
-		// TODO Auto-generated method stub
+		leftDriveLeader.setInverted(false);
+		rightDriveLeader.setInverted(false);
 		
+		leftDriveLeader.setSensorPhase(true);
+		
+		rightDriveLeader.setInverted(true);
+		rightDriveLeader.setSensorPhase(true);
+	}
+	
+	@Override
+	protected void updateDashboard()
+	{
+		SmartDashboard.putNumber("Left Speed (nu/100ms)", leftDriveLeader.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Right Speed (nu/100ms)", rightDriveLeader.getSelectedSensorPosition(0));
 	}
 }
