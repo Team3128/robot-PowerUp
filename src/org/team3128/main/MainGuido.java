@@ -18,18 +18,21 @@ import org.team3128.common.hardware.motor.NarwhalSRX.Reverse;
 import org.team3128.common.listener.ListenerManager;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
 import org.team3128.common.listener.controltypes.Button;
+import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Forklift;
+import org.team3128.mechanisms.Forklift.ForkliftState;
 import org.team3128.mechanisms.Intake;
-import org.team3128.mechanisms.Intake.intakeState;
+import org.team3128.mechanisms.Intake.IntakeState;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
@@ -48,16 +51,19 @@ public class MainGuido extends NarwhalRobot {
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPiston;
 	
+	// Pneumatics
+	public Compressor compressor;
+	
 	// Forklift
 	Forklift forklift;
-	public TalonSRX forkliftSRX1, forkliftSRX2;
-	DigitalInput forkLimSwitch;
+	public TalonSRX forkliftMotorLeader, forkliftMotorFollower;
+	DigitalInput forkliftSoftStopLimitSwitch;
 		
 	// Intake
 	Intake intake;
-	intakeState intakeState;
-	public VictorSPX intakeSPX1, intakeSPX2;
-	DigitalInput intakeLimSwitch;
+	IntakeState intakeState;
+	public VictorSPX intakeMotorLeader, intakeMotorFollower;
+	DigitalInput intakeLimitSwitch;
 	
 	// Controls
 	public ListenerManager listenerRight;
@@ -95,25 +101,30 @@ public class MainGuido extends NarwhalRobot {
 		// create SRXTankDrive
 		drive = new SRXTankDrive(leftDriveLeader, rightDriveLeader, wheelCirc, 1, 25.25 * Length.in, 30.5 * Length.in, 3600);
 		
-		gearshiftPiston = new Piston(0, 1);
+		gearshiftPiston = new Piston(2, 7);
 		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
 		
 		drive.addShifter(gearshift, shiftUpSpeed, shiftDownSpeed);
 		
-		/*
+		
 		// create intake
-		intakeState = Intake.intakeState.STOPPED;
-		intakeSPX1 = new VictorSPX(1);
-		intakeSPX2 = new VictorSPX(2);
-		intakeLimSwitch = new DigitalInput(2); //random channel
-		intake = new Intake(intakeSPX1, intakeSPX2, intakeLimSwitch, intakeState);
+		intakeState = Intake.IntakeState.STOPPED;
+		intakeMotorLeader = new VictorSPX(1);
+		intakeMotorFollower = new VictorSPX(2);
+		
+		intakeMotorLeader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
+		intakeMotorFollower.set(ControlMode.Follower, intakeMotorLeader.getDeviceID());
+		
+		compressor = new Compressor();
+		
+		//intakeLimitSwitch = new DigitalInput(2);
+		intake = new Intake(intakeMotorLeader, intakeState);
 		
 		// create forklift
-		forkliftSRX1 = new TalonSRX(30);
-		forkliftSRX2 = new TalonSRX(31);
-		forkLimSwitch = new DigitalInput(1); //random chanel
-		forklift = new Forklift(Forklift.State.GROUND, intake, forkliftSRX1, forkliftSRX2, forkLimSwitch);
-		*/
+		forkliftMotorLeader = new TalonSRX(30);
+		forkliftMotorFollower = new TalonSRX(31);
+		forkliftSoftStopLimitSwitch = new DigitalInput(1);
+		forklift = new Forklift(ForkliftState.GROUND, intake, forkliftMotorLeader, forkliftSoftStopLimitSwitch);
 		
 		// instantiate PDP
 		powerDistPanel = new PowerDistributionPanel();
@@ -131,28 +142,46 @@ public class MainGuido extends NarwhalRobot {
 
 	@Override
 	protected void setupListeners() {
-		//name controls
-		listenerRight.nameControl(ControllerExtreme3D.JOYY, "moveForwards");
-		listenerRight.nameControl(ControllerExtreme3D.TWIST, "moveTurn");
+		listenerRight.nameControl(ControllerExtreme3D.JOYY, "MoveForwards");
+		listenerRight.nameControl(ControllerExtreme3D.TWIST, "MoveTurn");
 		listenerRight.nameControl(ControllerExtreme3D.THROTTLE, "Throttle");
-		
-		//debug
-		Log.info("MainGuido", "Controllers Named");
 
-		//get Joy-stick data
 		listenerRight.addMultiListener(() -> {
 			Log.info("MainGuido", "Multi Listener Entered");
-			double x = listenerRight.getAxis("moveForwards");
-			double y = listenerRight.getAxis("moveTurn");
+			double x = listenerRight.getAxis("MoveForwards");
+			double y = listenerRight.getAxis("MoveTurn");
 			double t = listenerRight.getAxis("Throttle") * -1;
 			
 			drive.arcadeDrive(x, y, t, true);
-		}, "moveForwards", "moveTurn", "Throttle");
+		}, "MoveForwards", "MoveTurn", "Throttle");
+		
+		listenerRight.nameControl(new Button(2), "GearShift");
+		listenerRight.addButtonDownListener("GearShift", drive::shift);
 
-
+		
+		listenerRight.nameControl(new POV(0), "ForkliftIntakePOV");
+		listenerRight.addListener("ForkliftIntakePOV", forklift::onPOVUpdate);
+		
+		listenerRight.nameControl(new Button(1), "SwitchOuttake");
+		listenerRight.addButtonDownListener("SwitchOuttake", forklift::switchOuttake);
+		listenerRight.addButtonUpListener("SwitchOuttake", forklift::rest);
+		
+		listenerRight.nameControl(new Button(11), "StartCompressor");
+		listenerRight.addButtonDownListener("StartCompressor", () -> {
+			compressor.start();
+		});
+		
+		listenerRight.nameControl(new Button(12), "StopCompressor");
+		listenerRight.addButtonDownListener("StopCompressor", () -> {
+			compressor.stop();
+		});
+		
 		listenerLeft.nameControl(new Button(11), "ClearStickyFaults");
-		listenerLeft.addButtonDownListener("ClearStickyFaults", () -> {
-			
+		listenerLeft.addButtonDownListener("ClearStickyFaults", powerDistPanel::clearStickyFaults);	
+		
+		listenerLeft.nameControl(ControllerExtreme3D.JOYX, "ForkliftTest");
+		listenerLeft.addListener("ForkliftTest", (double joyY) -> {
+			forkliftMotorFollower.set(ControlMode.PercentOutput, joyY);
 		});
 	}
 

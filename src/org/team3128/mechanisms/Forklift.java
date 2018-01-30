@@ -1,16 +1,15 @@
 package org.team3128.mechanisms;
 
+import org.team3128.common.listener.POVValue;
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.units.Length;
-import org.team3128.mechanisms.Intake.intakeState;
+import org.team3128.mechanisms.Intake.IntakeState;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.command.Command;
 
 /**
@@ -21,67 +20,65 @@ import edu.wpi.first.wpilibj.command.Command;
  */
 
 public class Forklift {
-	// constant to multiple encoder values to get accurate measurements
-	final double constant = 6;
+	/**
+	 * The ratio of the number of native units that results in
+	 * a forkift movement of 1 centimeter.
+	 */
+	final double ratio = 6;
+	final double tolerance = 5 * Length.in;
 
-	// max height
-	final double stallHeight = 8 * Length.ft;
+	private IntakeState intakeState;
 
-	// predetermined fork-lift heights
-	private static double groundHeight = 0 * Length.ft;
-	private static double switchHeight = 3 * Length.ft;
-	private static double scaleHeight = 8 * Length.ft;
-
-	private static intakeState intakeState;
-
-	public enum State {
-
-		GROUND(groundHeight), SWITCH(switchHeight), SCALE(scaleHeight);
+	public enum ForkliftState {
+		GROUND(0 * Length.ft),
+		SWITCH(3 * Length.ft),
+		SCALE(8 * Length.ft);
 
 		private double targetHeight;
 
-		private State(double height) {
+		private ForkliftState(double height) {
 			this.targetHeight = height;
+		}
+		
+		public double getHeight() {
+			return targetHeight;
 		}
 	}
 
 	Intake intake;
-	TalonSRX leader;
-	TalonSRX follower;
-	DigitalInput limSwitch;
-	State state;
+	TalonSRX forkliftMotor;
+	DigitalInput softStopLimitSwitch;
+	ForkliftState state;
 	Thread depositCubeThread;
 
-	public Forklift(State state, Intake intake, TalonSRX leader, TalonSRX follower, DigitalInput limSwitch) {
+	public Forklift(ForkliftState state, Intake intake, TalonSRX forkliftMotor, DigitalInput softStopLimitSwitch) {
 		this.intake = intake;
-		this.leader = leader;
-		this.follower = follower;
-		this.limSwitch = limSwitch;
+		this.forkliftMotor = forkliftMotor;
+		this.softStopLimitSwitch = softStopLimitSwitch;
 		this.state = state;
-
-		// set leader feedback device
-		leader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
-
-		// set follower
-		follower.set(ControlMode.Follower, leader.getDeviceID());
 
 		depositCubeThread = new Thread(() -> {
 			while (true) {
-				// if limit switch ISN'T clicked, AND actual fork-lift height is less than the
-				// target then...
-				// set target position from parameter
-				if (!limSwitch.get() && leader.getSelectedSensorPosition(0) <= stallHeight + 3 * Length.in) {
-					leader.set(ControlMode.Position, state.targetHeight);
-
-					// if forklift has reached target height,
-					// then... set the intake based on parameter and stop while loop
-					if (state.targetHeight >= leader.getSelectedSensorPosition(0) * constant - 3 * Length.in
-							&& limSwitch.get() == false) {
+				if (softStopLimitSwitch.get()) {
+					forkliftMotor.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
+				}
+				
+				double position = forkliftMotor.getSelectedSensorPosition(0) / ratio;
+				double targetHeight = state.getHeight();
+				
+				double error = Math.abs(position - targetHeight);
+				
+				// If the desired IntakeState is not stopped (i.e. intaking from ground or outaking at ground, switch,
+				// or scale), run the intake only if the forklift is actually at the desired height
+				if (intakeState != IntakeState.STOPPED) {
+					if (error <= tolerance) {
 						intake.setState(intakeState);
-						break;
+					}
+					else {
+						intake.setState(IntakeState.STOPPED);
 					}
 				}
-
+				
 				try {
 					Thread.sleep(100);
 				} catch (InterruptedException e) {
@@ -89,16 +86,50 @@ public class Forklift {
 				}
 			}
 		});
+		
+		// depositCubeThread.start();
 	}
 
-	public void setState(State heightState, intakeState intState) {
-		state = heightState;
+	public void setState(ForkliftState forkliftState, IntakeState intState) {
+		if (state != forkliftState) {
+			state = forkliftState;
+			
+			forkliftMotor.set(ControlMode.Position, state.getHeight() * ratio);
+		}		
+		
 		intakeState = intState;
+	}
+	
+
+	public void onPOVUpdate(POVValue newValue) {
+		switch (newValue.getDirectionValue()) {
+		case 7:
+		case 0:
+		case 1:
+			setState(ForkliftState.SCALE, IntakeState.OUTTAKE);
+			break;
+		case 4:
+		case 5:
+		case 6:
+			setState(ForkliftState.GROUND, IntakeState.INTAKE);
+			break;
+		default:
+			setState(ForkliftState.GROUND, IntakeState.STOPPED);
+			break;
+		}
+	}
+	
+	public void switchOuttake() {
+		setState(ForkliftState.SWITCH, IntakeState.OUTTAKE);
+	}
+	
+	public void rest() {
+		setState(ForkliftState.GROUND, IntakeState.STOPPED);
 	}
 
 	public class CmdForkliftPush extends Command {
 
-		public CmdForkliftPush(State heightState, intakeState intState) {
+		public CmdForkliftPush(ForkliftState heightState, IntakeState intState) {
 			setState(heightState, intState);
 		}
 

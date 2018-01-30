@@ -32,7 +32,7 @@ public class AutoPlaceBlockSwitch_Left extends CommandGroup {
 			addSequential(drive.new CmdMoveForward(horizOffset, 2000, 0.75)); // move to switch horizontal
 			Log.info("MainGuido(AUTO)", "[2]reached switch horizontal");
 
-			addSequential(forklift.new CmdForkliftPush(Forklift.State.SWITCH, Intake.intakeState.OUTTAKE));
+			addSequential(forklift.new CmdForkliftPush(Forklift.ForkliftState.SWITCH, Intake.IntakeState.OUTTAKE));
 			Log.info("MainGuido(AUTO)", "[3]outtake activated");
 
 		} else if (gameData.charAt(0) == 'R') {
@@ -47,7 +47,7 @@ public class AutoPlaceBlockSwitch_Left extends CommandGroup {
 			addSequential(drive.new CmdMoveForward(horizOffset, 2000, 0.75)); // move to switch horizontal
 			Log.info("MainGuido(AUTO)", "[2]reached switch horizontal");
 
-			addSequential(forklift.new CmdForkliftPush(Forklift.State.SWITCH, Intake.intakeState.OUTTAKE));
+			addSequential(forklift.new CmdForkliftPush(Forklift.ForkliftState.SWITCH, Intake.IntakeState.OUTTAKE));
 			Log.info("MainGuido(AUTO)", "[3]outtake activated");
 		}
 
