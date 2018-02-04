@@ -12,8 +12,9 @@ import org.team3128.main.MainGuido;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
-public class CalibrateRunPID extends CommandGroup {
-	public CalibrateRunPID(MainGuido robot) 
+public class CalibrateRunPID extends CommandGroup
+{
+	public CalibrateRunPID(MainGuido robot)
 	{
 		addSequential(robot.drive.new CmdMoveForward(100 * Length.in, 10000, .7));
 		Log.info("Guido Auto", "CalibrateRunPID called");

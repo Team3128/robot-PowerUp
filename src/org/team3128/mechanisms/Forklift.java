@@ -23,78 +23,96 @@ public class Forklift {
 	/**
 	 * The ratio of the number of native units that results in
 	 * a forkift movement of 1 centimeter.
+	 * 
+	 * MAX ENCODER POSITION = 20,000
+	 * MAX HEIGHT = 12ft
 	 */
-	final double ratio = 6;
+	public final double ratio = 1.14 * 4096.0 / (2 * 2.635 * Length.in * Math.PI);
 	final double tolerance = 5 * Length.in;
+	
+	public double error, currentPosition;
 
 	private IntakeState intakeState;
 
 	public enum ForkliftState {
 		GROUND(0 * Length.ft),
 		SWITCH(3 * Length.ft),
-		SCALE(8 * Length.ft);
+		SCALE(5.75 * Length.ft);
 
-		private double targetHeight;
+		public double targetHeight;
 
 		private ForkliftState(double height) {
 			this.targetHeight = height;
-		}
-		
-		public double getHeight() {
-			return targetHeight;
 		}
 	}
 
 	Intake intake;
 	TalonSRX forkliftMotor;
 	DigitalInput softStopLimitSwitch;
-	ForkliftState state;
-	Thread depositCubeThread;
+	public ForkliftState state;
+	Thread depositCubeThread, depositingRollerThread;
 
 	public Forklift(ForkliftState state, Intake intake, TalonSRX forkliftMotor, DigitalInput softStopLimitSwitch) {
 		this.intake = intake;
 		this.forkliftMotor = forkliftMotor;
 		this.softStopLimitSwitch = softStopLimitSwitch;
 		this.state = state;
+		
+		forkliftMotor.configMotionCruiseVelocity(1000, Constants.CAN_TIMEOUT);
+		forkliftMotor.configMotionAcceleration(4000, Constants.CAN_TIMEOUT);
+		
+		forkliftMotor.selectProfileSlot(1, 0);
 
-		depositCubeThread = new Thread(() -> {
-			while (true) {
-				if (softStopLimitSwitch.get()) {
-					forkliftMotor.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
-				}
+		depositingRollerThread = new Thread(() ->
+		{
+			while(true)
+			{
+//				if (softStopLimitSwitch.get()) {
+//					forkliftMotor.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
+//				}
 				
-				double position = forkliftMotor.getSelectedSensorPosition(0) / ratio;
-				double targetHeight = state.getHeight();
+				currentPosition = forkliftMotor.getSelectedSensorPosition(0) / ratio;
+				double targetHeight = this.state.targetHeight;
 				
-				double error = Math.abs(position - targetHeight);
+				error = Math.abs(currentPosition - targetHeight);
 				
 				// If the desired IntakeState is not stopped (i.e. intaking from ground or outaking at ground, switch,
 				// or scale), run the intake only if the forklift is actually at the desired height
-				if (intakeState != IntakeState.STOPPED) {
+				if (this.intakeState != IntakeState.STOPPED) {
 					if (error <= tolerance) {
-						intake.setState(intakeState);
+						this.intake.setState(intakeState);
 					}
 					else {
-						intake.setState(IntakeState.STOPPED);
+						this.intake.setState(IntakeState.STOPPED);
 					}
 				}
 				
-				try {
+				try
+				{
 					Thread.sleep(100);
-				} catch (InterruptedException e) {
+				}
+				catch (InterruptedException e)
+				{
 					e.printStackTrace();
 				}
+				
 			}
 		});
 		
-		// depositCubeThread.start();
+		depositingRollerThread.start();
 	}
 
 	public void setState(ForkliftState forkliftState, IntakeState intState) {
 		if (state != forkliftState) {
+			if (forkliftState.targetHeight < state.targetHeight) {
+				forkliftMotor.selectProfileSlot(1, 0);
+			}
+			else {
+				forkliftMotor.selectProfileSlot(0, 0);
+			}
 			state = forkliftState;
-			
-			forkliftMotor.set(ControlMode.Position, state.getHeight() * ratio);
+			Log.info("Forklift and Intake", "Going to" + state.targetHeight );
+			forkliftMotor.set(ControlMode.MotionMagic, state.targetHeight * ratio);
 		}		
 		
 		intakeState = intState;
@@ -128,14 +146,20 @@ public class Forklift {
 	}
 
 	public class CmdForkliftPush extends Command {
-
+		ForkliftState heightState;
+		IntakeState intState;
+		
 		public CmdForkliftPush(ForkliftState heightState, IntakeState intState) {
-			setState(heightState, intState);
+			Log.debug("Command Forklift", "Setting height to " + heightState.targetHeight);
+			
+			this.heightState = heightState;
+			this.intState = intState;
 		}
 
 		@Override
 		protected void initialize() {
 			// setState(tempHeightState, tempIntState);
+			setState(heightState, intState);
 			Log.debug("Forklift and Intake", "Changing state to ... ");
 		}
 

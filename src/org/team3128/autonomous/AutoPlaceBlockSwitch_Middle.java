@@ -1,19 +1,13 @@
 package org.team3128.autonomous;
 
-import org.team3128.common.autonomous.movement.CmdTurnGyro;
 import org.team3128.common.drive.SRXTankDrive;
-import org.team3128.common.drive.SRXTankDrive.CmdInPlaceTurn;
-import org.team3128.common.drive.SRXTankDrive.CmdMoveForward;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.enums.Direction;
-import org.team3128.common.util.units.Length;
+import org.team3128.mechanisms.Forklift;
+import org.team3128.mechanisms.Intake;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.command.CommandGroup;
-
-import org.team3128.mechanisms.Forklift;
-import org.team3128.mechanisms.Intake;
-import org.team3128.mechanisms.Forklift.CmdForkliftPush;
 
 public class AutoPlaceBlockSwitch_Middle extends CommandGroup {
 	public AutoPlaceBlockSwitch_Middle(SRXTankDrive drive, Forklift forklift) {

@@ -1,5 +1,7 @@
 package org.team3128.mechanisms;
 
+import org.team3128.common.hardware.misc.Piston;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
@@ -12,30 +14,37 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class Intake {
 	public enum IntakeState {
-		STOPPED(0),
-		INTAKE(1),
-		OUTTAKE(-1);
+		STOPPED(0, true),
+		INTAKE(-1.0, false),
+		OUTTAKE(1.0, true);
 
 		private double rollerPower;
+		private boolean isOpen;
 		
-		private IntakeState(double rollerPower) {
+		private IntakeState(double rollerPower, boolean isOpen) {
 			this.rollerPower = rollerPower;
+			this.isOpen = isOpen;
 		}
 
 		public double getRollerPower() {
 			return rollerPower;
+		}
+		public boolean getPistonPosition() {
+			return isOpen;
 		}
 	}
 
 	VictorSPX intakeMotors;
 	//private DigitalInput limSwitch;
 	private IntakeState state;
+	private Piston piston;
 
 	//constructor
-	public Intake(VictorSPX intakeMotors, IntakeState state) {
+	public Intake(VictorSPX intakeMotors, IntakeState state, Piston piston) {
 		this.intakeMotors = intakeMotors;
 		//this.limSwitch = limSwitch;
 		this.state = state;
+		this.piston = piston;		
 	}
 	
 	public void setState(IntakeState newState) {
@@ -43,6 +52,13 @@ public class Intake {
 			state = newState;
 			
 			intakeMotors.set(ControlMode.PercentOutput, state.getRollerPower());
+		
+			if(newState.getPistonPosition()) {
+				piston.setPistonOn();
+			}
+			else {
+				piston.setPistonOff();
+			}
 		}
 	}
 
