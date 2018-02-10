@@ -16,21 +16,21 @@ public class Intake {
 	public enum IntakeState {
 		STOPPED(0, true),
 		INTAKE(-1.0, false),
-		OUTTAKE(1.0, true);
+		OUTTAKE(1.0, false);
 
 		private double rollerPower;
-		private boolean isOpen;
+		private boolean isClosed;
 		
-		private IntakeState(double rollerPower, boolean isOpen) {
+		private IntakeState(double rollerPower, boolean isClosed) {
 			this.rollerPower = rollerPower;
-			this.isOpen = isOpen;
+			this.isClosed = isClosed;
 		}
 
 		public double getRollerPower() {
 			return rollerPower;
 		}
 		public boolean getPistonPosition() {
-			return isOpen;
+			return isClosed;
 		}
 	}
 

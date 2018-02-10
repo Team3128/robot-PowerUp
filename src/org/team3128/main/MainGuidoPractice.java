@@ -6,6 +6,11 @@
 
 package org.team3128.main;
 
+import org.team3128.common.util.datatypes.PIDConstants;
+import org.team3128.common.util.units.Length;
+
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
@@ -17,7 +22,22 @@ public class MainGuidoPractice extends MainGuido {
 
 	@Override
 	protected void constructHardware() {
+		limitSiwtchLocation = 0;
+		
+		wheelCirc = 12.68 * Length.in;
+		
+		positionUpwardsPID = new PIDConstants(0.8, 0, 0.9, 1.2);
+		positionDownwardsPID = new PIDConstants(0.8, 0, 0.9, 1.2);
+		velocityPID = new PIDConstants(0, 0, 0, 0);
+		
 		super.constructHardware();
+		
+		forklift.maxHeight = 12000;
+		
+		CameraServer cameraServer = CameraServer.getInstance();
+		UsbCamera camera = cameraServer.startAutomaticCapture(0);
+		camera.setFPS(15);
+		camera.setResolution(240, 135);
 	}
 
 	@Override
