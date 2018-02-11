@@ -52,8 +52,7 @@ public class MainGuido extends NarwhalRobot
 	public SRXTankDrive drive;
 	public NarwhalSRX leftDriveLeader, leftDriveFollower;
 	public NarwhalSRX rightDriveLeader, rightDriveFollower;
-	
-	
+
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPiston;
 
@@ -64,9 +63,9 @@ public class MainGuido extends NarwhalRobot
 	public Forklift forklift;
 	public TalonSRX forkliftMotorLeader, forkliftMotorFollower;
 	DigitalInput forkliftSoftStopLimitSwitch;
-	
+
 	public PIDConstants positionUpwardsPID, positionDownwardsPID, velocityPID;
-	
+
 	public int limitSiwtchLocation, forkliftMaxVelocity;
 
 	// Intake
@@ -87,12 +86,10 @@ public class MainGuido extends NarwhalRobot
 	public PowerDistributionPanel powerDistPanel;
 	public double shiftUpSpeed = 100;
 	public double shiftDownSpeed = 200;
-	
+
 	public int max_speed = 0;
-	
+
 	public long startTimeMillis = 0;
-	
-	
 
 	@Override
 	protected void constructHardware()
@@ -131,7 +128,7 @@ public class MainGuido extends NarwhalRobot
 		intakeMotorLeader = new VictorSPX(1);
 		intakeMotorFollower = new VictorSPX(2);
 		intakePiston = new Piston(1, 6);
-		//intakePiston.invertPiston();
+		// intakePiston.invertPiston();
 
 		intakeMotorFollower.set(ControlMode.Follower, intakeMotorLeader.getDeviceID());
 
@@ -150,8 +147,9 @@ public class MainGuido extends NarwhalRobot
 		forkliftMotorLeader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
 				Constants.CAN_TIMEOUT);
 		forkliftMotorFollower.set(ControlMode.Follower, forkliftMotorLeader.getDeviceID());
-		
-		forklift = new Forklift(ForkliftState.GROUND, intake, forkliftMotorLeader, forkliftSoftStopLimitSwitch, limitSiwtchLocation, forkliftMaxVelocity, positionUpwardsPID, positionDownwardsPID, velocityPID);
+
+		forklift = new Forklift(ForkliftState.GROUND, intake, forkliftMotorLeader, forkliftSoftStopLimitSwitch,
+				limitSiwtchLocation, forkliftMaxVelocity, positionUpwardsPID, positionDownwardsPID, velocityPID);
 
 		// instantiate PDP
 		powerDistPanel = new PowerDistributionPanel();
@@ -186,10 +184,12 @@ public class MainGuido extends NarwhalRobot
 		listenerRight.addButtonDownListener("GearShift", drive::shift);
 
 		listenerRight.nameControl(new POV(0), "IntakePOV");
-		listenerRight.addListener("IntakePOV", (POVValue pov) -> {
+		listenerRight.addListener("IntakePOV", (POVValue pov) ->
+		{
 			int val = pov.getDirectionValue();
-			
-			switch (val) {
+
+			switch (val)
+			{
 			case 7:
 			case 8:
 			case 1:
@@ -204,20 +204,24 @@ public class MainGuido extends NarwhalRobot
 				intake.setState(IntakeState.STOPPED);
 			}
 		});
-		
+
 		listenerRight.nameControl(new Button(5), "ForkliftRightUp");
-		listenerRight.addButtonDownListener("ForkliftRightUp", () -> {
+		listenerRight.addButtonDownListener("ForkliftRightUp", () ->
+		{
 			forklift.powerControl(1.0);
 		});
-		listenerRight.addButtonUpListener("ForkliftRightUp", () -> {
+		listenerRight.addButtonUpListener("ForkliftRightUp", () ->
+		{
 			forklift.powerControl(0);
 		});
-		
+
 		listenerRight.nameControl(new Button(3), "ForkliftRightDown");
-		listenerRight.addButtonDownListener("ForkliftRightDown", () -> {
+		listenerRight.addButtonDownListener("ForkliftRightDown", () ->
+		{
 			forklift.powerControl(-0.7);
 		});
-		listenerRight.addButtonUpListener("ForkliftRightDown", () -> {
+		listenerRight.addButtonUpListener("ForkliftRightDown", () ->
+		{
 			forklift.powerControl(0.0);
 		});
 
@@ -234,7 +238,7 @@ public class MainGuido extends NarwhalRobot
 		{
 			compressor.stop();
 		});
-		
+
 		listenerLeft.nameControl(new Button(11), "ClearStickyFaults");
 		listenerLeft.addButtonDownListener("ClearStickyFaults", powerDistPanel::clearStickyFaults);
 
@@ -280,14 +284,14 @@ public class MainGuido extends NarwhalRobot
 	protected void teleopInit()
 	{
 		forklift.disabled = false;
-		
+
 		leftDriveLeader.setSensorPhase(true);
 
 		rightDriveLeader.setInverted(true);
 		rightDriveLeader.setSensorPhase(true);
 
 		intakeState = IntakeState.STOPPED;
-		
+
 		leftDriveLeader.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
 		gearshift.shiftToHigh();
 		if (gearshift.isInHighGear())
@@ -302,15 +306,18 @@ public class MainGuido extends NarwhalRobot
 			Log.info("MainGuido", "Log: Gearshift is in Low Gear");
 
 		}
-		
+
 		startTimeMillis = System.currentTimeMillis();
 	}
-	
+
 	@Override
-	protected void teleopPeriodic() {
-		//Log.info("MainGuido", ((System.currentTimeMillis() - startTimeMillis) / 1000.0) + "," + (wheelCirc * rightDriveLeader.getSelectedSensorVelocity(0) * 10.0 / 4096.0));
+	protected void teleopPeriodic()
+	{
+		// Log.info("MainGuido", ((System.currentTimeMillis() - startTimeMillis)
+		// / 1000.0) + "," + (wheelCirc *
+		// rightDriveLeader.getSelectedSensorVelocity(0) * 10.0 / 4096.0));
 	}
-	
+
 	@Override
 	protected void disabledInit()
 	{
@@ -333,27 +340,20 @@ public class MainGuido extends NarwhalRobot
 	@Override
 	protected void updateDashboard()
 	{
-		// Log.info("Smart Dashboard", "update called");
-		SmartDashboard.putNumber("Left Encoder Position", leftDriveLeader.getSelectedSensorPosition(0));
-		SmartDashboard.putNumber("Right Encoder Position", rightDriveLeader.getSelectedSensorPosition(0));
-		SmartDashboard.putNumber("Left Encoder Velocity", leftDriveLeader.getSelectedSensorVelocity(0));
-		SmartDashboard.putNumber("Right Encoder Velocity", rightDriveLeader.getSelectedSensorVelocity(0));
-
 		SmartDashboard.putNumber("Forklift Velocity", forkliftMotorLeader.getSelectedSensorVelocity(0));
-		SmartDashboard.putString("Current Forklift State", forklift.state.name());
-		SmartDashboard.putNumber("Forklift Target", forklift.state.targetHeight * forklift.ratio);
-		SmartDashboard.putNumber("Forklift Encoder Position", forkliftMotorLeader.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Forklift Position", forkliftMotorLeader.getSelectedSensorPosition(0));
 
 		SmartDashboard.putNumber("Current Forklift Error (in)", forklift.error / Length.in);
 		SmartDashboard.putNumber("Current Forklift Position (in)", forklift.currentPosition / Length.in);
 
-		SmartDashboard.putBoolean("Forklift Limit Switch Depressed", forklift.getForkliftSwitch());
 		SmartDashboard.putString("Forklift Control Mode", forklift.controlMode.getName());
-		SmartDashboard.putBoolean("Can Raise", forklift.canRaise);
-		
-		
-		max_speed = Math.max(max_speed, forkliftMotorLeader.getSelectedSensorVelocity(0));
-		SmartDashboard.putNumber("Max Speed", max_speed);
-		// SmartDashboard.putString("Gear: ", drive.get)
+		if (drive.isInHighGear())
+		{
+			SmartDashboard.putString("Gear", "HIGH GEAR");
+		}
+		else
+		{
+			SmartDashboard.putString("Gear", "LOW GEAR");
+		}
 	}
 }

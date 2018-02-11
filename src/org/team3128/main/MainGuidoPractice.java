@@ -32,7 +32,7 @@ public class MainGuidoPractice extends MainGuido {
 		
 		super.constructHardware();
 		
-		forklift.maxHeight = 12000;
+		forklift.maxHeight = 17000;
 		
 		CameraServer cameraServer = CameraServer.getInstance();
 		UsbCamera camera = cameraServer.startAutomaticCapture(0);

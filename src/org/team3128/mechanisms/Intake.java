@@ -16,7 +16,7 @@ public class Intake {
 	public enum IntakeState {
 		STOPPED(0, true),
 		INTAKE(-1.0, false),
-		OUTTAKE(1.0, false);
+		OUTTAKE(1.0, true);
 
 		private double rollerPower;
 		private boolean isClosed;

@@ -48,8 +48,10 @@ public class Forklift
 
 	public enum ForkliftControlMode
 	{
-		PERCENT_UP(0, "Percent (Up)"), PERCENT_DOWN(0, "Percent (Down)"), VELOCITY(0, "Velocity"), POSITION_UP(1,
-				"Position (Up)"), POSITION_DOWN(2, "Position (Down)");
+		PERCENT(0, "Percent Output"),
+		VELOCITY(0, "Velocity"),
+		POSITION_UP(1, "Position (Up)"),
+		POSITION_DOWN(2, "Position (Down)");
 
 		private int pidSlot;
 		private String name;
@@ -105,7 +107,10 @@ public class Forklift
 
 	public boolean canLower = false;
 	public boolean canRaise = true;
-
+	
+	private double desiredTarget = 0;
+	private double setPoint = 0;
+	
 	public Forklift(ForkliftState state, Intake intake, TalonSRX forkliftMotor, DigitalInput softStopLimitSwitch,
 			int limitSwitchLocation, int forkliftMaxVelocity, PIDConstants positionUpwardsPID,
 			PIDConstants positionDownwardsPID, PIDConstants velocityPID)
@@ -116,7 +121,7 @@ public class Forklift
 		this.limitSwitchLocation = limitSwitchLocation;
 		this.state = state;
 
-		controlMode = ForkliftControlMode.PERCENT_UP;
+		controlMode = ForkliftControlMode.PERCENT;
 
 		forkliftMotor.config_kP(1, positionUpwardsPID.getkP(), Constants.CAN_TIMEOUT);
 		forkliftMotor.config_kI(1, positionUpwardsPID.getkI(), Constants.CAN_TIMEOUT);
@@ -132,6 +137,8 @@ public class Forklift
 		forkliftMotor.configMotionAcceleration(4000, Constants.CAN_TIMEOUT);
 
 		forkliftMotor.selectProfileSlot(1, 0);
+		
+		forkliftMotor.configOpenloopRamp(0.2, Constants.CAN_TIMEOUT);
 
 		depositingRollerThread = new Thread(() ->
 		{
@@ -147,22 +154,30 @@ public class Forklift
 					this.forkliftMotor.set(ControlMode.PercentOutput, 0);
 				}
 				else {
+					double target = 0;
 					
 					this.canRaise = this.forkliftMotor.getSelectedSensorPosition(0) < this.maxHeight;
-
-					if (this.forkliftMotor.getSelectedSensorPosition(0) > this.maxHeight - 200 && this.controlMode.equals(ForkliftControlMode.PERCENT_UP))
-					{
-						this.forkliftMotor.set(ControlMode.PercentOutput, 0);
-					}					
-					
 					this.canLower = this.forkliftMotor.getSelectedSensorPosition(0) > 100;
-
-					if (!this.canLower && this.controlMode.equals(ForkliftControlMode.PERCENT_DOWN))
-					{
-						this.forkliftMotor.set(ControlMode.PercentOutput, 0);
-						Log.info("Forklift", "cannot lower");
+					
+					if (this.controlMode == ForkliftControlMode.PERCENT) {
+						if (this.desiredTarget > 0 && this.canRaise) {
+							target = this.desiredTarget;
+						}
+						else if (this.desiredTarget < 0 && this.canLower) {
+							target = 0.7 * this.desiredTarget;
+						}
+						
+						if ((Math.abs(target) < 0.1
+								&& this.forkliftMotor.getSelectedSensorPosition(0) / ratio >= this.brakeHeight)) {
+							target = this.brakePower;
+						}
 					}
-
+						
+					if (Math.abs(target - this.setPoint) > 0.0001) {
+						this.forkliftMotor.set(ControlMode.PercentOutput, target);
+						
+						this.setPoint = target;
+					}
 				}
 
 				
@@ -204,56 +219,36 @@ public class Forklift
 		}
 	}
 
-	private boolean shouldBrake(double joy)
-	{
-		return Math.abs(joy) < 0.1 && forkliftMotor.getSelectedSensorPosition(0) / ratio >= brakeHeight;
-	}
-
-	public void velocityControl(double joystick)
-	{
-		setControlMode(ForkliftControlMode.VELOCITY);
-
-		if (shouldBrake(joystick))
-		{
-			forkliftMotor.set(ControlMode.Velocity, 0);
-		}
-		else if (joystick > 0)
-		{
-			int velocity = (int) (forkliftMaxVelocity * joystick);
-			forkliftMotor.set(ControlMode.Velocity, velocity);
-		}
-		else
-		{
-			int velocity = (int) (0.7 * forkliftMaxVelocity * joystick);
-			forkliftMotor.set(ControlMode.Velocity, velocity);
-		}
-	}
+//	private boolean shouldBrake(double joy)
+//	{
+//		return Math.abs(joy) < 0.1 && forkliftMotor.getSelectedSensorPosition(0) / ratio >= brakeHeight;
+//	}
+//
+//	public void velocityControl(double joystick)
+//	{
+//		setControlMode(ForkliftControlMode.VELOCITY);
+//
+//		if (shouldBrake(joystick))
+//		{
+//			forkliftMotor.set(ControlMode.Velocity, 0);
+//		}
+//		else if (joystick > 0)
+//		{
+//			int velocity = (int) (forkliftMaxVelocity * joystick);
+//			forkliftMotor.set(ControlMode.Velocity, velocity);
+//		}
+//		else
+//		{
+//			int velocity = (int) (0.7 * forkliftMaxVelocity * joystick);
+//			forkliftMotor.set(ControlMode.Velocity, velocity);
+//		}
+//	}
 
 	public void powerControl(double joystick)
 	{
-		if (shouldBrake(joystick))
-		{
-			setControlMode(ForkliftControlMode.PERCENT_UP);
-
-			forkliftMotor.set(ControlMode.PercentOutput, brakePower);
-		}
-		else if (joystick > 0 && canRaise)
-		{
-			Log.debug("Forklift", "The forklift can raise: " + canRaise);
-			setControlMode(ForkliftControlMode.PERCENT_UP);
-
-			forkliftMotor.set(ControlMode.PercentOutput, joystick);
-		}
-		else if (canLower)
-		{
-			
-			setControlMode(ForkliftControlMode.PERCENT_DOWN);
-
-			forkliftMotor.set(ControlMode.PercentOutput, joystick * 0.7);
-		}
-		else {
-			forkliftMotor.set(ControlMode.PercentOutput, brakePower);
-		}
+		setControlMode(ForkliftControlMode.PERCENT);
+		
+		desiredTarget = joystick;
 	}
 
 	public boolean getForkliftSwitch()
