@@ -9,12 +9,12 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 
 public class AutoCrossBaseline_Middle extends CommandGroup {
 	public AutoCrossBaseline_Middle(SRXTankDrive drive, Forklift forklift) {
-		AutoValues autoValues = new AutoValues();
+		PowerUpField autoValues = new PowerUpField();
 
-		final double switchDistance = autoValues.switchDistance; // vertical distance between startPos and switch
-		final double horizOffset = autoValues.horizOffset; // distance between start position horizontal and switch
+		final double switchDistance = autoValues.SWITCH_VERTICAL_OFFSET; // vertical distance between startPos and switch
+		final double horizOffset = autoValues.SIWTCH_HORIZONAL_OFFSET; // distance between start position horizontal and switch
 															// horizontal
-		final double switchWidth = autoValues.switchDistance; // width of the switch
+		final double switchWidth = autoValues.SWITCH_VERTICAL_OFFSET; // width of the switch
 
 		String gameData = "LLL";
 		//gameData = DriverStation.getInstance().getGameSpecificMessage();
