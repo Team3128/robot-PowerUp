@@ -1,6 +1,6 @@
 /*
  *     
- * Date: 1/12/2018	
+\[] * Date: 1/12/2018	
  * Description: Setup teleop and autonomous modes for 2018 MainGuido for testing purposes
  *
  * 
@@ -15,8 +15,6 @@ import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.hardware.misc.TwoSpeedGearshift;
-import org.team3128.common.hardware.motor.NarwhalSRX;
-import org.team3128.common.hardware.motor.NarwhalSRX.Reverse;
 import org.team3128.common.listener.ListenerManager;
 import org.team3128.common.listener.POVValue;
 import org.team3128.common.listener.controllers.ControllerExtreme3D;
@@ -24,7 +22,6 @@ import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
-import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Forklift.ForkliftState;
@@ -38,9 +35,12 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PowerDistributionPanel;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.command.CommandGroup;
+import edu.wpi.first.wpilibj.hal.PowerJNI;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -50,11 +50,11 @@ public class MainGuido extends NarwhalRobot
 	// Drive Train
 	public double wheelCirc;
 	public SRXTankDrive drive;
-	public NarwhalSRX leftDriveLeader, leftDriveFollower;
-	public NarwhalSRX rightDriveLeader, rightDriveFollower;
+	public TalonSRX leftDriveLeader, leftDriveFollower;
+	public TalonSRX rightDriveLeader, rightDriveFollower;
 
 	public TwoSpeedGearshift gearshift;
-	public Piston gearshiftPiston;
+	public Piston gearshiftPiston, climberPiston, climberLockPiston;
 
 	// Pneumatics
 	public Compressor compressor;
@@ -64,8 +64,6 @@ public class MainGuido extends NarwhalRobot
 	public TalonSRX forkliftMotorLeader, forkliftMotorFollower;
 	DigitalInput forkliftSoftStopLimitSwitch;
 
-	public PIDConstants positionUpwardsPID, positionDownwardsPID, velocityPID;
-
 	public int limitSiwtchLocation, forkliftMaxVelocity;
 
 	// Intake
@@ -74,6 +72,8 @@ public class MainGuido extends NarwhalRobot
 	Piston intakePiston;
 	public VictorSPX intakeMotorLeader, intakeMotorFollower;
 	DigitalInput intakeLimitSwitch;
+	
+	boolean intakeInverted;
 
 	// Controls
 	public ListenerManager listenerRight;
@@ -90,20 +90,18 @@ public class MainGuido extends NarwhalRobot
 	public int max_speed = 0;
 
 	public long startTimeMillis = 0;
+	
+	public DriverStation ds;
+	public RobotController rc;
 
 	@Override
 	protected void constructHardware()
 	{
 		// Drive Train Setup
-		leftDriveLeader = new NarwhalSRX(20, Reverse.ENCODER, Reverse.NONE);
-		leftDriveFollower = new NarwhalSRX(21, Reverse.OUTPUT, Reverse.NONE);
-		rightDriveLeader = new NarwhalSRX(10, Reverse.BOTH, Reverse.OUTPUT);
-		rightDriveFollower = new NarwhalSRX(11, Reverse.OUTPUT, Reverse.NONE);
-
-		// rightDrive1.setInverted(false);
-		// rightDrive2.setInverted(false);
-		// leftDrive1.setInverted(true);
-		// leftDrive2.setInverted(true);
+		leftDriveLeader = new TalonSRX(20);
+		leftDriveFollower = new TalonSRX(21);
+		rightDriveLeader = new TalonSRX(10);
+		rightDriveFollower = new TalonSRX(11);
 
 		// set Leaders
 		leftDriveLeader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, Constants.CAN_TIMEOUT);
@@ -119,7 +117,7 @@ public class MainGuido extends NarwhalRobot
 				3600);
 		// drive.setLeftSpeedScalar(0.3);
 
-		gearshiftPiston = new Piston(2, 5);
+		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
 		drive.addShifter(gearshift, shiftUpSpeed, shiftDownSpeed);
 
@@ -127,17 +125,14 @@ public class MainGuido extends NarwhalRobot
 		intakeState = Intake.IntakeState.STOPPED;
 		intakeMotorLeader = new VictorSPX(1);
 		intakeMotorFollower = new VictorSPX(2);
-		intakePiston = new Piston(1, 6);
-		// intakePiston.invertPiston();
 
 		intakeMotorFollower.set(ControlMode.Follower, intakeMotorLeader.getDeviceID());
-
 		intakeMotorLeader.setInverted(true);
 
 		compressor = new Compressor();
 
 		// intakeLimitSwitch = new DigitalInput(2);
-		intake = new Intake(intakeMotorLeader, intakeState, intakePiston);
+		intake = new Intake(intakeMotorLeader, intakeState, intakePiston, intakeInverted);
 
 		// create forklift
 		forkliftMotorLeader = new TalonSRX(30);
@@ -149,7 +144,7 @@ public class MainGuido extends NarwhalRobot
 		forkliftMotorFollower.set(ControlMode.Follower, forkliftMotorLeader.getDeviceID());
 
 		forklift = new Forklift(ForkliftState.GROUND, intake, forkliftMotorLeader, forkliftSoftStopLimitSwitch,
-				limitSiwtchLocation, forkliftMaxVelocity, positionUpwardsPID, positionDownwardsPID, velocityPID);
+				limitSiwtchLocation, forkliftMaxVelocity);
 
 		// instantiate PDP
 		powerDistPanel = new PowerDistributionPanel();
@@ -163,6 +158,7 @@ public class MainGuido extends NarwhalRobot
 		listenerRight = new ListenerManager(rightJoystick);
 		addListenerManager(listenerRight);
 
+		ds = DriverStation.getInstance();
 	}
 
 	@Override
@@ -223,6 +219,12 @@ public class MainGuido extends NarwhalRobot
 		listenerRight.addButtonUpListener("ForkliftRightDown", () ->
 		{
 			forklift.powerControl(0.0);
+		});
+		
+		listenerLeft.nameControl(new Button(7), "ZeroForklift");
+		listenerLeft.addButtonDownListener("ZeroForklift", () ->
+		{
+			forkliftMotorLeader.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
 		});
 
 		listenerRight.nameControl(new Button(11), "StartCompressor");
@@ -285,11 +287,6 @@ public class MainGuido extends NarwhalRobot
 	{
 		forklift.disabled = false;
 
-		leftDriveLeader.setSensorPhase(true);
-
-		rightDriveLeader.setInverted(true);
-		rightDriveLeader.setSensorPhase(true);
-
 		intakeState = IntakeState.STOPPED;
 
 		leftDriveLeader.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
@@ -328,13 +325,6 @@ public class MainGuido extends NarwhalRobot
 	protected void autonomousInit()
 	{
 		forklift.disabled = false;
-		leftDriveLeader.setInverted(false);
-		rightDriveLeader.setInverted(false);
-
-		leftDriveLeader.setSensorPhase(true);
-
-		rightDriveLeader.setInverted(true);
-		rightDriveLeader.setSensorPhase(true);
 	}
 
 	@Override
@@ -355,5 +345,7 @@ public class MainGuido extends NarwhalRobot
 		{
 			SmartDashboard.putString("Gear", "LOW GEAR");
 		}
+		
+		SmartDashboard.putNumber("Battery Voltage", PowerJNI.getVinVoltage());
 	}
 }

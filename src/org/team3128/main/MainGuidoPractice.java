@@ -6,7 +6,6 @@
 
 package org.team3128.main;
 
-import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.units.Length;
 
 import edu.wpi.cscore.UsbCamera;
@@ -21,14 +20,13 @@ public class MainGuidoPractice extends MainGuido {
 	}
 
 	@Override
-	protected void constructHardware() {
+	protected void constructHardware() {		
+		
 		limitSiwtchLocation = 0;
 		
 		wheelCirc = 12.68 * Length.in;
 		
-		positionUpwardsPID = new PIDConstants(0.8, 0, 0.9, 1.2);
-		positionDownwardsPID = new PIDConstants(0.8, 0, 0.9, 1.2);
-		velocityPID = new PIDConstants(0, 0, 0, 0);
+		intakeInverted = false;
 		
 		super.constructHardware();
 		
@@ -52,10 +50,23 @@ public class MainGuidoPractice extends MainGuido {
 	@Override
 	protected void teleopInit() {
 		super.teleopInit();
+		
+		leftDriveLeader.setSensorPhase(true);
+
+		rightDriveLeader.setInverted(true);
+		rightDriveLeader.setSensorPhase(true);
 	}
 
 	@Override
 	protected void autonomousInit() {
 		super.autonomousInit();
+		
+		leftDriveLeader.setInverted(false);
+		rightDriveLeader.setInverted(false);
+
+		leftDriveLeader.setSensorPhase(true);
+
+		rightDriveLeader.setInverted(true);
+		rightDriveLeader.setSensorPhase(true);
 	}
 }

@@ -2,7 +2,6 @@ package org.team3128.mechanisms;
 
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
-import org.team3128.common.util.datatypes.PIDConstants;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Intake.IntakeState;
 
@@ -36,7 +35,9 @@ public class Forklift
 
 	public enum ForkliftState
 	{
-		GROUND(0 * Length.ft), SWITCH(3 * Length.ft), SCALE(5.75 * Length.ft);
+		GROUND(0 * Length.ft),
+		SWITCH(3 * Length.ft),
+		SCALE(5.75 * Length.ft);
 
 		public double targetHeight;
 
@@ -48,10 +49,9 @@ public class Forklift
 
 	public enum ForkliftControlMode
 	{
-		PERCENT(0, "Percent Output"),
-		VELOCITY(0, "Velocity"),
-		POSITION_UP(1, "Position (Up)"),
-		POSITION_DOWN(2, "Position (Down)");
+		PERCENT(2, "Percent Output"),
+		POSITION_UP(0, "Position (Up)"),
+		POSITION_DOWN(1, "Position (Down)");
 
 		private int pidSlot;
 		private String name;
@@ -112,8 +112,7 @@ public class Forklift
 	private double setPoint = 0;
 	
 	public Forklift(ForkliftState state, Intake intake, TalonSRX forkliftMotor, DigitalInput softStopLimitSwitch,
-			int limitSwitchLocation, int forkliftMaxVelocity, PIDConstants positionUpwardsPID,
-			PIDConstants positionDownwardsPID, PIDConstants velocityPID)
+			int limitSwitchLocation, int forkliftMaxVelocity)
 	{
 		this.intake = intake;
 		this.forkliftMotor = forkliftMotor;
@@ -122,16 +121,6 @@ public class Forklift
 		this.state = state;
 
 		controlMode = ForkliftControlMode.PERCENT;
-
-		forkliftMotor.config_kP(1, positionUpwardsPID.getkP(), Constants.CAN_TIMEOUT);
-		forkliftMotor.config_kI(1, positionUpwardsPID.getkI(), Constants.CAN_TIMEOUT);
-		forkliftMotor.config_kD(1, positionUpwardsPID.getkD(), Constants.CAN_TIMEOUT);
-		forkliftMotor.config_kF(1, positionUpwardsPID.getkF(), Constants.CAN_TIMEOUT);
-
-		forkliftMotor.config_kP(2, positionUpwardsPID.getkP(), Constants.CAN_TIMEOUT);
-		forkliftMotor.config_kI(2, positionUpwardsPID.getkI(), Constants.CAN_TIMEOUT);
-		forkliftMotor.config_kD(2, positionUpwardsPID.getkD(), Constants.CAN_TIMEOUT);
-		forkliftMotor.config_kF(2, positionUpwardsPID.getkF(), Constants.CAN_TIMEOUT);
 
 		forkliftMotor.configMotionCruiseVelocity(1000, Constants.CAN_TIMEOUT);
 		forkliftMotor.configMotionAcceleration(4000, Constants.CAN_TIMEOUT);
@@ -218,31 +207,6 @@ public class Forklift
 			forkliftMotor.set(ControlMode.MotionMagic, state.targetHeight * ratio);
 		}
 	}
-
-//	private boolean shouldBrake(double joy)
-//	{
-//		return Math.abs(joy) < 0.1 && forkliftMotor.getSelectedSensorPosition(0) / ratio >= brakeHeight;
-//	}
-//
-//	public void velocityControl(double joystick)
-//	{
-//		setControlMode(ForkliftControlMode.VELOCITY);
-//
-//		if (shouldBrake(joystick))
-//		{
-//			forkliftMotor.set(ControlMode.Velocity, 0);
-//		}
-//		else if (joystick > 0)
-//		{
-//			int velocity = (int) (forkliftMaxVelocity * joystick);
-//			forkliftMotor.set(ControlMode.Velocity, velocity);
-//		}
-//		else
-//		{
-//			int velocity = (int) (0.7 * forkliftMaxVelocity * joystick);
-//			forkliftMotor.set(ControlMode.Velocity, velocity);
-//		}
-//	}
 
 	public void powerControl(double joystick)
 	{
