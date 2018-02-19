@@ -22,7 +22,8 @@ public class MainGuidoCompetition extends MainGuido {
 	protected void constructHardware() {
 		limitSiwtchLocation = 0;
 		
-		wheelCirc = 12.68 * Length.in;
+		wheelCirc = 12.6 * Length.in;
+		lowGearMaxSpeed = 3600;
 		
 		gearshiftPiston = new Piston(3, 4);
 		intakePiston = new Piston(1, 6);
@@ -37,6 +38,7 @@ public class MainGuidoCompetition extends MainGuido {
 		intakeInverted = true;
 		
 		super.constructHardware();
+		
 		forklift.maxHeight = 17000;
 	}
 
@@ -61,15 +63,30 @@ public class MainGuidoCompetition extends MainGuido {
 
 	@Override
 	protected void teleopInit() {
-		rightDriveFollower.setInverted(true);
-		rightDriveLeader.setInverted(true);
-		
+		invertSetup();
 		
 		super.teleopInit();
 	}
 
 	@Override
 	protected void autonomousInit() {
+		invertSetup();
+		
 		super.autonomousInit();
+	}
+	
+	public void invertSetup() {
+		leftDriveLeader.setInverted(false);
+		leftDriveFollower.setInverted(false);
+		
+		rightDriveLeader.setInverted(false);
+		rightDriveFollower.setInverted(false);
+		
+		
+		rightDriveFollower.setInverted(true);
+		rightDriveLeader.setInverted(true);
+		
+		rightDriveLeader.setSensorPhase(true);
+		leftDriveLeader.setSensorPhase(true);
 	}
 }

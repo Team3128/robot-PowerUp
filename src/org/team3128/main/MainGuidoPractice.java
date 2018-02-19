@@ -21,10 +21,10 @@ public class MainGuidoPractice extends MainGuido {
 
 	@Override
 	protected void constructHardware() {		
-		
 		limitSiwtchLocation = 0;
 		
 		wheelCirc = 12.68 * Length.in;
+		lowGearMaxSpeed = 3600;
 		
 		intakeInverted = false;
 		

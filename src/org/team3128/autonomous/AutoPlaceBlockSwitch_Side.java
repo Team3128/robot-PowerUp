@@ -15,7 +15,7 @@ public class AutoPlaceBlockSwitch_Side extends CommandGroup {
 		PowerUpField autoValues = new PowerUpField();
 		
 		final double switchDistance = autoValues.SWITCH_VERTICAL_OFFSET; // vertical distance between startPos and switch
-		final double horizOffset = autoValues.SIWTCH_HORIZONAL_OFFSET; // distance between start position horizontal and switch horizontal
+		final double horizOffset = autoValues.CENTER_OFFSET; // distance between start position horizontal and switch horizontal
 		final double switchWidth = autoValues.SWITCH_VERTICAL_OFFSET; // width of the switch
 		
 		startSide = startSide.toUpperCase();

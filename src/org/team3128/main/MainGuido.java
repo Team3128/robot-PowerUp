@@ -55,6 +55,10 @@ public class MainGuido extends NarwhalRobot
 
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPiston, climberPiston, climberLockPiston;
+	
+	public double shiftUpSpeed, shiftDownSpeed;
+
+	public int lowGearMaxSpeed;
 
 	// Pneumatics
 	public Compressor compressor;
@@ -84,10 +88,6 @@ public class MainGuido extends NarwhalRobot
 
 	// Misc(general)
 	public PowerDistributionPanel powerDistPanel;
-	public double shiftUpSpeed = 100;
-	public double shiftDownSpeed = 200;
-
-	public int max_speed = 0;
 
 	public long startTimeMillis = 0;
 	
@@ -114,9 +114,10 @@ public class MainGuido extends NarwhalRobot
 
 		// create SRXTankDrive
 		drive = new SRXTankDrive(leftDriveLeader, rightDriveLeader, wheelCirc, 1, 25.25 * Length.in, 30.5 * Length.in,
-				3600);
-		// drive.setLeftSpeedScalar(0.3);
-
+				lowGearMaxSpeed);
+		
+		shiftUpSpeed = 5.0 * Length.ft * 60 / wheelCirc;
+		shiftDownSpeed = 4.0 * Length.ft * 60 / wheelCirc;
 		
 		gearshift = new TwoSpeedGearshift(false, gearshiftPiston);
 		drive.addShifter(gearshift, shiftUpSpeed, shiftDownSpeed);
@@ -313,6 +314,8 @@ public class MainGuido extends NarwhalRobot
 		// Log.info("MainGuido", ((System.currentTimeMillis() - startTimeMillis)
 		// / 1000.0) + "," + (wheelCirc *
 		// rightDriveLeader.getSelectedSensorVelocity(0) * 10.0 / 4096.0));
+		
+		//drive.autoshift();
 	}
 
 	@Override
@@ -336,6 +339,9 @@ public class MainGuido extends NarwhalRobot
 		SmartDashboard.putNumber("Current Forklift Error (in)", forklift.error / Length.in);
 		SmartDashboard.putNumber("Current Forklift Position (in)", forklift.currentPosition / Length.in);
 
+		SmartDashboard.putNumber("Right Drive Velocity (nu/100ms)", rightDriveLeader.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Left Drive Velocity (nu/100ms)", leftDriveLeader.getSelectedSensorVelocity(0));
+	
 		SmartDashboard.putString("Forklift Control Mode", forklift.controlMode.getName());
 		if (drive.isInHighGear())
 		{

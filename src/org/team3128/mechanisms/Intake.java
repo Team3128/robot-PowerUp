@@ -54,6 +54,9 @@ public class Intake {
 		this.piston = piston;		
 		
 		this.invertMultiplier = (inverted) ? -1 : 1;
+		
+		this.state = IntakeState.OUTTAKE;
+		setState(IntakeState.STOPPED);
 	}
 	
 	public void setState(IntakeState newState) {
