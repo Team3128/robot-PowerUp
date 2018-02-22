@@ -26,7 +26,7 @@ public class Forklift
 	 * 
 	 * MAX ENCODER POSITION = 20,000 MAX HEIGHT = 12ft
 	 */
-	public final double ratio = 1.14 * 4096.0 / (2 * 2.635 * Length.in * Math.PI);
+	public final double ratio = 19100.0 / (76 * Length.in);
 	final double tolerance = 5 * Length.in;
 
 	public double error, currentPosition;
@@ -37,7 +37,7 @@ public class Forklift
 	{
 		GROUND(0 * Length.ft),
 		SWITCH(3 * Length.ft),
-		SCALE(5.75 * Length.ft);
+		SCALE(57 * Length.in);
 
 		public double targetHeight;
 
@@ -79,8 +79,9 @@ public class Forklift
 		if (mode != controlMode)
 		{
 			controlMode = mode;
-
-			forkliftMotor.selectProfileSlot(mode.pidSlot, 0);
+			Log.debug("setControlMode", "Setting to " + mode.name());
+			forkliftMotor.selectProfileSlot(mode.getPIDSlot(), 0);
+			System.out.println(mode.getPIDSlot());
 		}
 	}
 
@@ -93,10 +94,6 @@ public class Forklift
 	public ForkliftState state;
 
 	int limitSwitchLocation, forkliftMaxVelocity;
-
-	int currentPIDSlot = 0;
-
-	public double restPosition = 0;
 
 	public double brakePower = 0.15;
 	public double brakeHeight = 0.5 * Length.ft;
@@ -111,6 +108,8 @@ public class Forklift
 	private double desiredTarget = 0;
 	private double setPoint = 0;
 	
+	public boolean rezero = false;
+	
 	public Forklift(ForkliftState state, Intake intake, TalonSRX forkliftMotor, DigitalInput softStopLimitSwitch,
 			int limitSwitchLocation, int forkliftMaxVelocity)
 	{
@@ -122,10 +121,10 @@ public class Forklift
 
 		controlMode = ForkliftControlMode.PERCENT;
 
-		forkliftMotor.configMotionCruiseVelocity(1000, Constants.CAN_TIMEOUT);
+		forkliftMotor.configMotionCruiseVelocity(2000, Constants.CAN_TIMEOUT);
 		forkliftMotor.configMotionAcceleration(4000, Constants.CAN_TIMEOUT);
 
-		forkliftMotor.selectProfileSlot(1, 0);
+		forkliftMotor.selectProfileSlot(0, 0);
 		
 		forkliftMotor.configOpenloopRamp(0.2, Constants.CAN_TIMEOUT);
 
@@ -149,24 +148,31 @@ public class Forklift
 					this.canLower = this.forkliftMotor.getSelectedSensorPosition(0) > 100;
 					
 					if (this.controlMode == ForkliftControlMode.PERCENT) {
-						if (this.desiredTarget > 0 && this.canRaise) {
+						if (this.rezero) {
 							target = this.desiredTarget;
 						}
-						else if (this.desiredTarget < 0 && this.canLower) {
-							target = 0.7 * this.desiredTarget;
-						}
-						
-						if ((Math.abs(target) < 0.1
-								&& this.forkliftMotor.getSelectedSensorPosition(0) / ratio >= this.brakeHeight)) {
-							target = this.brakePower;
+						else {
+							if (this.desiredTarget > 0 && this.canRaise) {
+								target = this.desiredTarget;
+							}
+							else if (this.desiredTarget < 0 && this.canLower) {
+								target = 0.7 * this.desiredTarget;
+							}
+							
+							if ((Math.abs(target) < 0.1
+									&& this.forkliftMotor.getSelectedSensorPosition(0) / ratio >= this.brakeHeight)) {
+								target = this.brakePower;
+							}
+							
+							if (Math.abs(target - this.setPoint) > 0.0001) {
+								this.forkliftMotor.set(ControlMode.PercentOutput, target);
+								
+								this.setPoint = target;
+							}
 						}
 					}
 						
-					if (Math.abs(target - this.setPoint) > 0.0001) {
-						this.forkliftMotor.set(ControlMode.PercentOutput, target);
-						
-						this.setPoint = target;
-					}
+					
 				}
 
 				
@@ -220,36 +226,35 @@ public class Forklift
 		return !softStopLimitSwitch.get();
 	}
 
-	public class CmdForkliftPush extends Command
+	public class CmdSetForkliftPosition extends Command
 	{
 		ForkliftState heightState;
-		IntakeState intState;
 
-		public CmdForkliftPush(ForkliftState heightState, IntakeState intState)
+		public CmdSetForkliftPosition(ForkliftState heightState)
 		{
-			Log.debug("Command Forklift", "Setting height to " + heightState.targetHeight);
-
+			super(3000);
 			this.heightState = heightState;
-			this.intState = intState;
 		}
 
 		@Override
 		protected void initialize()
 		{
-			// setState(tempHeightState, tempIntState);
 			setState(heightState);
-			Log.debug("Forklift and Intake", "Changing state to ... ");
+			Log.debug("CmdSetForkliftPosition", "Changing state to " + heightState.name());
+			Log.debug("CmdSetForkliftPosition", "Target: " + forkliftMotor.getClosedLoopTarget(0));
 		}
 
-		/*
-		 * @Override protected void execute() {
-		 * 
-		 * }
-		 * 
-		 * @Override protected void end() {
-		 * 
-		 * }
-		 */
+		
+		@Override
+		protected void execute() {
+			Log.debug("CmdSetForkliftPosition", "Error: " + (forkliftMotor.getSelectedSensorPosition(0) - (int)(heightState.targetHeight * ratio)));
+		}
+		
+		@Override
+		protected void end() {
+			powerControl(0);
+			Log.debug("CmdSetForkliftPosition", "Forklift at desired height of " + heightState.targetHeight);
+		}
 
 		@Override
 		protected void interrupted()
@@ -261,9 +266,47 @@ public class Forklift
 		@Override
 		protected boolean isFinished()
 		{
-			Log.debug("Forklift and Intake", "Task completed.");
-			return false;
-			// return isTimedOut();
+			return isTimedOut() || Math.abs(forkliftMotor.getSelectedSensorPosition(0) - (int)(heightState.targetHeight * ratio)) < 300;
+		}
+	}
+
+	public class CmdRunIntake extends Command
+	{
+		IntakeState state;
+
+		public CmdRunIntake(IntakeState state)
+		{
+			super(0.5);
+			this.state = state;
+		}
+
+		@Override
+		protected void initialize()
+		{
+			intake.setState(state);
+		}
+
+		
+		@Override
+		protected void execute() {
+		}
+		
+		@Override
+		protected void end() {
+			intake.setState(IntakeState.STOPPED);
+		}
+
+		@Override
+		protected void interrupted()
+		{
+			Log.debug("CmdRunIntake", "Ending, was interrupted.");
+			end();
+		}
+
+		@Override
+		protected boolean isFinished()
+		{
+			return isTimedOut();
 		}
 	}
 }

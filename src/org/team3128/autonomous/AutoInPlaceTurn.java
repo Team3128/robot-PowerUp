@@ -6,18 +6,15 @@
  */
 package org.team3128.autonomous;
 
-import org.team3128.common.util.Log;
-import org.team3128.common.util.units.Length;
+import org.team3128.common.util.enums.Direction;
 import org.team3128.main.MainGuido;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
-public class CalibrateRunPID extends CommandGroup
+public class AutoInPlaceTurn extends CommandGroup
 {
-	public CalibrateRunPID(MainGuido robot)
+	public AutoInPlaceTurn(MainGuido robot, double angle, Direction dir)
 	{
-		addSequential(robot.drive.new CmdMoveForward(100 * Length.in, 10000, .7));
-		Log.info("Guido Auto", "CalibrateRunPID called");
-
+		addSequential(robot.drive.new CmdInPlaceTurn((float) angle, 0.6, 10000, dir));
 	}
 }

@@ -8,9 +8,12 @@
 
 package org.team3128.main;
 
+import org.team3128.autonomous.AutoArcTurn;
 import org.team3128.autonomous.AutoCrossBaseline_Middle;
-import org.team3128.autonomous.CalibrateForkliftPID;
-import org.team3128.autonomous.CalibrateRunPID;
+import org.team3128.autonomous.AutoDriveDistance;
+import org.team3128.autonomous.AutoInPlaceTurn;
+import org.team3128.autonomous.AutoScaleDropoffTest;
+import org.team3128.autonomous.AutoSetForkliftState;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -22,6 +25,8 @@ import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
+import org.team3128.common.util.enums.Direction;
+import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Forklift.ForkliftState;
@@ -33,6 +38,7 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -52,6 +58,8 @@ public class MainGuido extends NarwhalRobot
 	public SRXTankDrive drive;
 	public TalonSRX leftDriveLeader, leftDriveFollower;
 	public TalonSRX rightDriveLeader, rightDriveFollower;
+	
+	public ADXRS450_Gyro gyro;
 
 	public TwoSpeedGearshift gearshift;
 	public Piston gearshiftPiston, climberPiston, climberLockPiston;
@@ -112,6 +120,8 @@ public class MainGuido extends NarwhalRobot
 		leftDriveFollower.set(ControlMode.Follower, leftDriveLeader.getDeviceID());
 		rightDriveFollower.set(ControlMode.Follower, rightDriveLeader.getDeviceID());
 
+		gyro = new ADXRS450_Gyro();
+		
 		// create SRXTankDrive
 		drive = new SRXTankDrive(leftDriveLeader, rightDriveLeader, wheelCirc, 1, 25.25 * Length.in, 30.5 * Length.in,
 				lowGearMaxSpeed);
@@ -138,7 +148,6 @@ public class MainGuido extends NarwhalRobot
 		// create forklift
 		forkliftMotorLeader = new TalonSRX(30);
 		forkliftMotorFollower = new TalonSRX(31);
-		forkliftSoftStopLimitSwitch = new DigitalInput(7);
 
 		forkliftMotorLeader.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0,
 				Constants.CAN_TIMEOUT);
@@ -250,7 +259,17 @@ public class MainGuido extends NarwhalRobot
 		{
 			forklift.powerControl(joyY);
 		});
-
+		
+		listenerLeft.nameControl(new Button(11), "ReZero");
+		listenerLeft.addButtonDownListener("ReZero", () -> {
+			forklift.rezero = true;
+			forklift.powerControl(-0.5);
+		});
+		listenerLeft.addButtonUpListener("ReZero", () -> {
+			forklift.rezero = false;
+			forklift.powerControl(0);
+		});
+		
 		listenerLeft.nameControl(new POV(0), "IntakePOV");
 		listenerLeft.addListener("IntakePOV", (POVValue pov) ->
 		{
@@ -273,13 +292,33 @@ public class MainGuido extends NarwhalRobot
 				break;
 			}
 		});
+		
+//		listenerLeft.nameControl(new Button(9), "FullDrive");
+//		listenerLeft.addButtonDownListener("FullDrive", () -> {
+//			drive.arcadeDrive(-1.0, 0, 1.0, true);
+//		});
+//		listenerLeft.addButtonUpListener("FullDrive", () -> {
+//			drive.arcadeDrive(0, 0, 1.0, true);
+//		});
 	}
 
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser)
 	{
 		programChooser.addDefault("None", null);
-		programChooser.addObject("100 Inch Run", new CalibrateRunPID(this));
-		programChooser.addObject("Calibrate Forklift PID", new CalibrateForkliftPID(this));
+		programChooser.addObject("Drive 50 Inches", new AutoDriveDistance(this, 50 * Length.in));
+		programChooser.addObject("Drive 75 Inches", new AutoDriveDistance(this, 75 * Length.in));
+		programChooser.addObject("Drive 100 Inches", new AutoDriveDistance(this, 100 * Length.in));
+		programChooser.addObject("Drive 125 Inches", new AutoDriveDistance(this, 125 * Length.in));
+		
+		programChooser.addObject("Turn Right 90 degrees", new AutoInPlaceTurn(this, 90 * Angle.DEGREES, Direction.RIGHT));
+		programChooser.addObject("Arc Turn Right 90 degrees", new AutoArcTurn(this, 90 * Angle.DEGREES, Direction.RIGHT));
+		
+		programChooser.addObject("Forklift Set Scale", new AutoSetForkliftState(this, ForkliftState.SCALE));
+		programChooser.addObject("Forklift Set Switch", new AutoSetForkliftState(this, ForkliftState.SWITCH));
+		programChooser.addObject("Forklift Set Floor", new AutoSetForkliftState(this, ForkliftState.GROUND));
+
+		programChooser.addObject("Test Scale Dropoff", new AutoScaleDropoffTest(this));
+		
 		programChooser.addObject("Auto Cross Baseline", new AutoCrossBaseline_Middle(drive, forklift));
 	}
 
@@ -339,9 +378,11 @@ public class MainGuido extends NarwhalRobot
 		SmartDashboard.putNumber("Current Forklift Error (in)", forklift.error / Length.in);
 		SmartDashboard.putNumber("Current Forklift Position (in)", forklift.currentPosition / Length.in);
 
-		SmartDashboard.putNumber("Right Drive Velocity (nu/100ms)", rightDriveLeader.getSelectedSensorVelocity(0));
-		SmartDashboard.putNumber("Left Drive Velocity (nu/100ms)", leftDriveLeader.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Right Speed (nu/100ms)", rightDriveLeader.getSelectedSensorVelocity(0));
+		SmartDashboard.putNumber("Left Speed (nu/100ms)", leftDriveLeader.getSelectedSensorVelocity(0));
 	
+		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+		
 		SmartDashboard.putString("Forklift Control Mode", forklift.controlMode.getName());
 		if (drive.isInHighGear())
 		{

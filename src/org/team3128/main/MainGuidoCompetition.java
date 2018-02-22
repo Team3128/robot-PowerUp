@@ -10,6 +10,9 @@ import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.util.units.Length;
 
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.CameraServer;
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.CommandGroup;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 
@@ -23,7 +26,7 @@ public class MainGuidoCompetition extends MainGuido {
 		limitSiwtchLocation = 0;
 		
 		wheelCirc = 12.6 * Length.in;
-		lowGearMaxSpeed = 3600;
+		lowGearMaxSpeed = 3800;
 		
 		gearshiftPiston = new Piston(3, 4);
 		intakePiston = new Piston(1, 6);
@@ -36,10 +39,16 @@ public class MainGuidoCompetition extends MainGuido {
 		//intakePiston.invertPiston();
 		
 		intakeInverted = true;
+		forkliftSoftStopLimitSwitch = new DigitalInput(6);
 		
 		super.constructHardware();
 		
-		forklift.maxHeight = 17000;
+		forklift.maxHeight = 19000;
+		
+		CameraServer cameraServer = CameraServer.getInstance();
+		UsbCamera camera = cameraServer.startAutomaticCapture(0);
+		camera.setFPS(15);
+		camera.setResolution(240, 135);
 	}
 
 	@Override

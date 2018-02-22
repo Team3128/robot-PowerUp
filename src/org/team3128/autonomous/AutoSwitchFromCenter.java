@@ -4,7 +4,7 @@ import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.mechanisms.Forklift;
-import org.team3128.mechanisms.Intake;
+import org.team3128.mechanisms.Forklift.ForkliftState;
 import org.team3128.util.PlateAllocation;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
@@ -27,7 +27,7 @@ public class AutoSwitchFromCenter extends CommandGroup {
 			addSequential(drive.new CmdMoveForward(horizOffset, 2000, 0.75)); // move to switch horizontal
 			Log.info("MainGuido(AUTO)", "[2]reached switch horizontal");
 
-			addSequential(forklift.new CmdForkliftPush(Forklift.ForkliftState.SWITCH, Intake.IntakeState.OUTTAKE));
+			addSequential(forklift.new CmdSetForkliftPosition(ForkliftState.SWITCH));
 			Log.info("MainGuido(AUTO)", "[3]outtake activated");
 
 		} else {
@@ -42,7 +42,7 @@ public class AutoSwitchFromCenter extends CommandGroup {
 			addSequential(drive.new CmdMoveForward(horizOffset, 2000, 0.75)); // move to switch horizontal
 			Log.info("MainGuido(AUTO)", "[2]reached switch horizontal");
 
-			addSequential(forklift.new CmdForkliftPush(Forklift.ForkliftState.SWITCH, Intake.IntakeState.OUTTAKE));
+			addSequential(forklift.new CmdSetForkliftPosition(ForkliftState.SWITCH));
 			Log.info("MainGuido(AUTO)", "[3]outtake activated");
 		}
 
