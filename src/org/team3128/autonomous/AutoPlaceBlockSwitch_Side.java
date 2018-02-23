@@ -12,11 +12,17 @@ import edu.wpi.first.wpilibj.command.CommandGroup;
 public class AutoPlaceBlockSwitch_Side extends CommandGroup {
 	public AutoPlaceBlockSwitch_Side(SRXTankDrive drive, Forklift forklift, String startSide) {
 
-		PowerUpField autoValues = new PowerUpField();
+		PowerUpAutoValues autoValues = new PowerUpAutoValues();
 		
+<<<<<<< Updated upstream
 		final double switchDistance = autoValues.SWITCH_VERTICAL_OFFSET; // vertical distance between startPos and switch
 		final double horizOffset = autoValues.CENTER_OFFSET; // distance between start position horizontal and switch horizontal
 		final double switchWidth = autoValues.SWITCH_VERTICAL_OFFSET; // width of the switch
+=======
+		final double switchDistance = autoValues.SWITCH_DISTANCE; // vertical distance between startPos and switch
+		final double horizOffset = autoValues.SIWTCH_HORIZONAL_OFFSET; // distance between start position horizontal and switch horizontal
+		final double switchWidth = autoValues.SWITCH_DISTANCE; // width of the switch
+>>>>>>> Stashed changes
 		
 		startSide = startSide.toUpperCase();
 
