@@ -11,7 +11,6 @@ package org.team3128.main;
 import org.team3128.autonomous.AutoArcTurn;
 import org.team3128.autonomous.AutoCrossBaseline_Middle;
 import org.team3128.autonomous.AutoDriveDistance;
-import org.team3128.autonomous.AutoInPlaceTurn;
 import org.team3128.autonomous.AutoScaleDropoffTest;
 import org.team3128.autonomous.AutoSetForkliftState;
 import org.team3128.common.NarwhalRobot;
@@ -310,8 +309,7 @@ public class MainGuido extends NarwhalRobot
 		programChooser.addObject("Drive 100 Inches", new AutoDriveDistance(this, 100 * Length.in));
 		programChooser.addObject("Drive 125 Inches", new AutoDriveDistance(this, 125 * Length.in));
 		
-		programChooser.addObject("Turn Right 90 degrees", new AutoInPlaceTurn(this, 90 * Angle.DEGREES, Direction.RIGHT));
-		programChooser.addObject("Arc Turn Right 90 degrees", new AutoArcTurn(this, 90 * Angle.DEGREES, Direction.RIGHT));
+		programChooser.addObject("Arc Turn Left 90 degrees", new AutoArcTurn(this, 90 * Angle.DEGREES, Direction.LEFT));
 		
 		programChooser.addObject("Forklift Set Scale", new AutoSetForkliftState(this, ForkliftState.SCALE));
 		programChooser.addObject("Forklift Set Switch", new AutoSetForkliftState(this, ForkliftState.SWITCH));
@@ -330,6 +328,8 @@ public class MainGuido extends NarwhalRobot
 		intakeState = IntakeState.STOPPED;
 
 		leftDriveLeader.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
+		rightDriveLeader.setSelectedSensorPosition(0, 0, Constants.CAN_TIMEOUT);
+
 		gearshift.shiftToHigh();
 		if (gearshift.isInHighGear())
 		{
@@ -367,6 +367,7 @@ public class MainGuido extends NarwhalRobot
 	protected void autonomousInit()
 	{
 		forklift.disabled = false;
+		drive.shiftToLow();
 	}
 
 	@Override
@@ -382,6 +383,13 @@ public class MainGuido extends NarwhalRobot
 		SmartDashboard.putNumber("Left Speed (nu/100ms)", leftDriveLeader.getSelectedSensorVelocity(0));
 	
 		SmartDashboard.putNumber("Gyro Angle", gyro.getAngle());
+		
+		SmartDashboard.putNumber("Left Encoder Position", leftDriveLeader.getSelectedSensorPosition(0));
+		SmartDashboard.putNumber("Right Encoder Position", rightDriveLeader.getSelectedSensorPosition(0));
+		
+		SmartDashboard.putNumber("Left Motor Output", leftDriveLeader.getMotorOutputPercent());
+		SmartDashboard.putNumber("Right Motor Output", rightDriveLeader.getMotorOutputPercent());
+
 		
 		SmartDashboard.putString("Forklift Control Mode", forklift.controlMode.getName());
 		if (drive.isInHighGear())

@@ -150,6 +150,8 @@ public class Forklift
 					if (this.controlMode == ForkliftControlMode.PERCENT) {
 						if (this.rezero) {
 							target = this.desiredTarget;
+							this.forkliftMotor.set(ControlMode.PercentOutput, target);
+							
 						}
 						else {
 							if (this.desiredTarget > 0 && this.canRaise) {

@@ -6,6 +6,7 @@
 
 package org.team3128.main;
 
+import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.util.units.Length;
 
 import edu.wpi.cscore.UsbCamera;
@@ -24,12 +25,15 @@ public class MainGuidoPractice extends MainGuido {
 	protected void constructHardware() {		
 		limitSiwtchLocation = 0;
 		
-		wheelCirc = 12.68 * Length.in;
+		wheelCirc = 12.20 * Length.in;
 		lowGearMaxSpeed = 3600;
 		
 		intakeInverted = false;
 		forkliftSoftStopLimitSwitch = new DigitalInput(7);
-		
+				
+		gearshiftPiston = new Piston(2, 5);
+		intakePiston = new Piston(1, 6);
+				
 		super.constructHardware();
 		
 		forklift.maxHeight = 17000;
