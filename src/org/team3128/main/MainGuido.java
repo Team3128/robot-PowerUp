@@ -9,10 +9,10 @@
 package org.team3128.main;
 
 import org.team3128.autonomous.AutoArcTurn;
-import org.team3128.autonomous.AutoCrossBaseline_Middle;
 import org.team3128.autonomous.AutoDriveDistance;
 import org.team3128.autonomous.AutoScaleDropoffTest;
 import org.team3128.autonomous.AutoSetForkliftState;
+import org.team3128.autonomous.AutoSwitchFromCenter;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -317,7 +317,7 @@ public class MainGuido extends NarwhalRobot
 
 		programChooser.addObject("Test Scale Dropoff", new AutoScaleDropoffTest(this));
 		
-		programChooser.addObject("Auto Cross Baseline", new AutoCrossBaseline_Middle(drive, forklift));
+		programChooser.addObject("Center Switch", new AutoSwitchFromCenter(drive, forklift));
 	}
 
 	@Override

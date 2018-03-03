@@ -1,9 +1,11 @@
 package org.team3128.autonomous;
 
+import org.team3128.common.autonomous.primitives.CmdRunInParallel;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Forklift.ForkliftState;
+import org.team3128.mechanisms.Intake.IntakeState;
 import org.team3128.util.PlateAllocation;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
@@ -20,15 +22,19 @@ public class AutoSwitchFromCenter extends CommandGroup {
 		}
 
 		final double turn_radius = horizontal_distance / 2;
-		final double vertical_travel = PowerUpAutoValues.SWITCH_BACK_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH
-				- horizontal_distance - PowerUpAutoValues.CUBE_EXTENSION;
+		final double vertical_travel = PowerUpAutoValues.SWITCH_FRONT_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH
+				- horizontal_distance;
 
+		final Direction opposite = (PlateAllocation.nearSwitch == Direction.RIGHT) ? Direction.LEFT : Direction.RIGHT;
+		
 		addSequential(drive.new CmdFancyArcTurn(turn_radius, 90, 5000, PlateAllocation.nearSwitch, 0.8));
-		// fancy turn 90 deg opposite plate direction
+		addSequential(drive.new CmdFancyArcTurn(turn_radius, 90, 5000, opposite, 0.8));
 
-		addParallel(drive.new CmdMoveForward(vertical_travel, 5000, 0.8));
-		// add parallel raise forklift to height
-
-		// add sequential deposit
+		addSequential(new CmdRunInParallel(
+				drive.new CmdMoveForward(vertical_travel, 5000, 0.8),
+				forklift.new CmdSetForkliftPosition(ForkliftState.SWITCH)
+		));
+		
+		addSequential(forklift.new CmdRunIntake(IntakeState.OUTTAKE, 500));
 	}
 }

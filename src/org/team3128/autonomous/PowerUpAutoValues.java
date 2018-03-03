@@ -11,18 +11,22 @@ public class PowerUpAutoValues {
 	// Robot-specific values
 	/**
 	 * The width (right edge to left edge) of the robot's bumpers.
+	 * 
+	 * FIX WITH BUPPS
 	 */
-	final static double ROBOT_WIDTH = 0 * Length.in;
+	final static double ROBOT_WIDTH = 31.5 * Length.in;
 
 	/**
 	 * The length (front edge to back edge) of the robot's bumpers.
+	 * 
+	 * FIX WITH BUPPS
 	 */
-	final static double ROBOT_LENGTH = 0 * Length.in;
+	final static double ROBOT_LENGTH = 27 * Length.in;
 
 	/**
 	 * How many inches the loaded power cube extends in front of the bumpers.
 	 */
-	final static double CUBE_EXTENSION = 0 * Length.in;
+	final static double CUBE_EXTENSION = 7 * Length.in;
 
 	
 	// Field-specific values

@@ -275,10 +275,22 @@ public class Forklift
 	public class CmdRunIntake extends Command
 	{
 		IntakeState state;
+		boolean timesOut;
 
 		public CmdRunIntake(IntakeState state)
 		{
 			super(0.5);
+			
+			timesOut = false;
+			
+			this.state = state;
+		}
+		
+		public CmdRunIntake(IntakeState state, int msec) {
+			super(msec / 1000.0);
+			
+			timesOut = true;
+			
 			this.state = state;
 		}
 
@@ -295,7 +307,8 @@ public class Forklift
 		
 		@Override
 		protected void end() {
-			intake.setState(IntakeState.STOPPED);
+			
+			if (timesOut) intake.setState(IntakeState.STOPPED);
 		}
 
 		@Override
