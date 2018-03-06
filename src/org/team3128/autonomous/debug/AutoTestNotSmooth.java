@@ -4,18 +4,18 @@
  * can easily be tuned(by checking distance and acceleration/deceleration).
  *
  */
-package org.team3128.autonomous;
+package org.team3128.autonomous.debug;
 
-import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
 import org.team3128.main.MainGuido;
 
 import edu.wpi.first.wpilibj.command.CommandGroup;
 
-public class AutoArcTurn extends CommandGroup
+public class AutoTestNotSmooth extends CommandGroup
 {
-	public AutoArcTurn(MainGuido robot, double angle, Direction dir)
+	public AutoTestNotSmooth(MainGuido robot)
 	{
-		addSequential(robot.drive.new CmdFancyArcTurn(36 * Length.in, (float) angle, 10000, dir, 1.0));
+		addSequential(robot.drive.new CmdMoveForward(50 * Length.in, 10000, false, .8));
+		addSequential(robot.drive.new CmdMoveForward(50 * Length.in, 10000, false, .8));
 	}
 }

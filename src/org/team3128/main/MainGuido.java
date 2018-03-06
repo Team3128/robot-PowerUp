@@ -8,11 +8,9 @@
 
 package org.team3128.main;
 
-import org.team3128.autonomous.AutoArcTurn;
-import org.team3128.autonomous.AutoDriveDistance;
-import org.team3128.autonomous.AutoScaleDropoffTest;
-import org.team3128.autonomous.AutoSetForkliftState;
+import org.team3128.autonomous.AutoScaleFromCenter;
 import org.team3128.autonomous.AutoSwitchFromCenter;
+import org.team3128.autonomous.AutoSwitchFromLeft;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -24,8 +22,6 @@ import org.team3128.common.listener.controltypes.Button;
 import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
-import org.team3128.common.util.enums.Direction;
-import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Forklift.ForkliftState;
@@ -304,20 +300,26 @@ public class MainGuido extends NarwhalRobot
 	protected void constructAutoPrograms(SendableChooser<CommandGroup> programChooser)
 	{
 		programChooser.addDefault("None", null);
-		programChooser.addObject("Drive 50 Inches", new AutoDriveDistance(this, 50 * Length.in));
-		programChooser.addObject("Drive 75 Inches", new AutoDriveDistance(this, 75 * Length.in));
-		programChooser.addObject("Drive 100 Inches", new AutoDriveDistance(this, 100 * Length.in));
-		programChooser.addObject("Drive 125 Inches", new AutoDriveDistance(this, 125 * Length.in));
-		
-		programChooser.addObject("Arc Turn Left 90 degrees", new AutoArcTurn(this, 90 * Angle.DEGREES, Direction.LEFT));
-		
-		programChooser.addObject("Forklift Set Scale", new AutoSetForkliftState(this, ForkliftState.SCALE));
-		programChooser.addObject("Forklift Set Switch", new AutoSetForkliftState(this, ForkliftState.SWITCH));
-		programChooser.addObject("Forklift Set Floor", new AutoSetForkliftState(this, ForkliftState.GROUND));
-
-		programChooser.addObject("Test Scale Dropoff", new AutoScaleDropoffTest(this));
+//		Debug
+//		
+//		programChooser.addObject("Drive 50 Inches", new AutoDriveDistance(this, 50 * Length.in));
+//		programChooser.addObject("Drive 75 Inches", new AutoDriveDistance(this, 75 * Length.in));
+//		programChooser.addObject("Drive 100 Inches", new AutoDriveDistance(this, 100 * Length.in));
+//		programChooser.addObject("Drive 125 Inches", new AutoDriveDistance(this, 125 * Length.in));
+//		
+//		programChooser.addObject("Test Smooth", new AutoTestSmooth(this));
+//		programChooser.addObject("Test Not Smooth", new AutoTestNotSmooth(this));
+//		
+//		programChooser.addObject("Arc Turn Left 90 degrees", new AutoArcTurn(this, 90 * Angle.DEGREES, Direction.LEFT));
+//		
+//		programChooser.addObject("Forklift Set Scale", new AutoSetForkliftState(this, ForkliftState.SCALE));
+//		programChooser.addObject("Forklift Set Switch", new AutoSetForkliftState(this, ForkliftState.SWITCH));
+//		programChooser.addObject("Forklift Set Floor", new AutoSetForkliftState(this, ForkliftState.GROUND));
 		
 		programChooser.addObject("Center Switch", new AutoSwitchFromCenter(drive, forklift));
+		programChooser.addObject("Center Scale", new AutoScaleFromCenter(drive, forklift));
+		
+		programChooser.addObject("Left Switch", new AutoSwitchFromLeft(drive, forklift));
 	}
 
 	@Override

@@ -1,4 +1,4 @@
-package org.team3128.autonomous;
+package org.team3128.autonomous.util;
 
 import org.team3128.common.util.units.Length;
 
@@ -14,19 +14,19 @@ public class PowerUpAutoValues {
 	 * 
 	 * FIX WITH BUPPS
 	 */
-	final static double ROBOT_WIDTH = 31.5 * Length.in;
+	public final static double ROBOT_WIDTH = 31.5 * Length.in;
 
 	/**
 	 * The length (front edge to back edge) of the robot's bumpers.
 	 * 
 	 * FIX WITH BUPPS
 	 */
-	final static double ROBOT_LENGTH = 27 * Length.in;
+	public final static double ROBOT_LENGTH = 27 * Length.in;
 
 	/**
 	 * How many inches the loaded power cube extends in front of the bumpers.
 	 */
-	final static double CUBE_EXTENSION = 7 * Length.in;
+	public final static double CUBE_EXTENSION = 7 * Length.in;
 
 	
 	// Field-specific values
@@ -34,46 +34,46 @@ public class PowerUpAutoValues {
 	 * The horizontal distance between the center of the field and the right edge of
 	 * the exchange tape.
 	 */
-	final static double CENTER_OFFSET = 12 * Length.in;
+	public final static double CENTER_OFFSET = 12 * Length.in;
 
 	/**
 	 * The horizontal distance between the center of the switch plate and the center
 	 * of the field.
 	 */
-	final static double SWITCH_PLATE_CENTER = 54 * Length.in;
+	public final static double SWITCH_PLATE_CENTER = 54 * Length.in;
 
 	/**
 	 * The vertical distance between the the alliance station wall and the front
 	 * panel of the switch fencing.
 	 */
-	final static double SWITCH_FRONT_DISTANCE = 140 * Length.in;
+	public final static double SWITCH_FRONT_DISTANCE = 140 * Length.in;
 
 	/**
 	 * The vertical distance between the the alliance station wall and the back
 	 * panel of the switch fencing.
 	 */
-	final static double SWITCH_BACK_DISTANCE = 196 * Length.in;
+	public final static double SWITCH_BACK_DISTANCE = 196 * Length.in;
 
 	/**
 	 * The width of the switch.
 	 */
-	final static double SWITCH_WIDTH = 153.5 * Length.in;
+	public final static double SWITCH_WIDTH = 153.5 * Length.in;
 
 	/**
 	 * The vertical distance between the the alliance station wall and the center of
 	 * the scale plate.
 	 */
-	final static double SCALE_DISTANCE = 324 * Length.in;
+	public final static double SCALE_DISTANCE = 324 * Length.in;
 
 	/**
 	 * The width of the scale.
 	 */
-	final static double SCALE_WIDTH = 180 * Length.in;
+	public final static double SCALE_WIDTH = 180 * Length.in;
 
 	/**
 	 * The distance between the center of the scale plate and the back panel of the
 	 * switch fencing.
 	 */
-	final static double SWITCH_SCALE_DISTANCE = 128 * Length.in;
+	public final static double SWITCH_SCALE_DISTANCE = 128 * Length.in;
 
 }

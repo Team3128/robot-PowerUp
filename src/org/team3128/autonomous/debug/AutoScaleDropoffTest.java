@@ -1,4 +1,4 @@
-package org.team3128.autonomous;
+package org.team3128.autonomous.debug;
 
 import org.team3128.main.MainGuido;
 import org.team3128.mechanisms.Forklift.ForkliftState;
