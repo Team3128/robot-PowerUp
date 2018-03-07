@@ -27,6 +27,7 @@ import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Forklift.ForkliftState;
 import org.team3128.mechanisms.Intake;
 import org.team3128.mechanisms.Intake.IntakeState;
+import org.team3128.util.PlateAllocation;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
@@ -48,6 +49,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class MainGuido extends NarwhalRobot
 {
 
+	PlateAllocation plateAllocation = new PlateAllocation();
+	
 	// Drive Train
 	public double wheelCirc;
 	public SRXTankDrive drive;
@@ -363,6 +366,12 @@ public class MainGuido extends NarwhalRobot
 	protected void disabledInit()
 	{
 		forklift.disabled = true;
+	}
+	
+	@Override
+	protected void disabledPeriodic()
+	{
+		plateAllocation.update();
 	}
 
 	@Override
