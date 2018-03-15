@@ -33,6 +33,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -337,6 +340,11 @@ public class MainGuido extends NarwhalRobot
 		SmartDashboard.putNumber("Current Forklift Position (in)", forklift.currentPosition / Length.in);
 
 		SmartDashboard.putString("Forklift Control Mode", forklift.controlMode.getName());
+		
+		NetworkTableInstance inst = NetworkTableInstance.getDefault();
+		NetworkTable table = inst.getTable("datatable");
+		table.getEntry("cow").setDouble(forklift.currentPosition / Length.in);
+		
 		if (drive.isInHighGear())
 		{
 			SmartDashboard.putString("Gear", "HIGH GEAR");
