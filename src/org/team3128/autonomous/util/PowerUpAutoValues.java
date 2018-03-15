@@ -14,19 +14,19 @@ public class PowerUpAutoValues {
 	 * 
 	 * FIX WITH BUPPS
 	 */
-	public final static double ROBOT_WIDTH = 31.5 * Length.in;
+	public final static double ROBOT_WIDTH = 38 * Length.in;
 
 	/**
 	 * The length (front edge to back edge) of the robot's bumpers.
 	 * 
 	 * FIX WITH BUPPS
 	 */
-	public final static double ROBOT_LENGTH = 27 * Length.in;
+	public final static double ROBOT_LENGTH = 33.5 * Length.in;
 
 	/**
 	 * How many inches the loaded power cube extends in front of the bumpers.
 	 */
-	public final static double CUBE_EXTENSION = 7 * Length.in;
+	public final static double CUBE_EXTENSION = 4 * Length.in;
 
 	
 	// Field-specific values
@@ -34,13 +34,15 @@ public class PowerUpAutoValues {
 	 * The horizontal distance between the center of the field and the right edge of
 	 * the exchange tape.
 	 */
-	public final static double CENTER_OFFSET = 12 * Length.in;
+	public final static double CENTER_OFFSET = 11 * Length.in;
+	
+	public final static double ALLIANCE_WALL_EDGE = 132 * Length.in;
 
 	/**
 	 * The horizontal distance between the center of the switch plate and the center
 	 * of the field.
 	 */
-	public final static double SWITCH_PLATE_CENTER = 54 * Length.in;
+	public final static double SWITCH_PLATE_CENTER = 54.5 * Length.in;
 
 	/**
 	 * The vertical distance between the the alliance station wall and the front
@@ -57,7 +59,7 @@ public class PowerUpAutoValues {
 	/**
 	 * The width of the switch.
 	 */
-	public final static double SWITCH_WIDTH = 153.5 * Length.in;
+	public final static double SWITCH_WIDTH = 154 * Length.in;
 
 	/**
 	 * The vertical distance between the the alliance station wall and the center of

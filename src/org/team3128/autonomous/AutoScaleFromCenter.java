@@ -11,8 +11,8 @@ import org.team3128.mechanisms.Intake.IntakeState;
 import org.team3128.util.PlateAllocation;
 
 public class AutoScaleFromCenter extends AutoGuidoBase {
-	public AutoScaleFromCenter(SRXTankDrive drive, Forklift forklift) {
-		super(drive, forklift);
+	public AutoScaleFromCenter(SRXTankDrive drive, Forklift forklift, double delay) {
+		super(drive, forklift, delay);
 		
 		final double robot_center_offset = PowerUpAutoValues.ROBOT_WIDTH / 2 - PowerUpAutoValues.CENTER_OFFSET;
 		final double alliance_wall_edge = 132 * Length.in;
@@ -24,10 +24,12 @@ public class AutoScaleFromCenter extends AutoGuidoBase {
 		} else {
 			horizontal_distance = alliance_wall_edge + robot_center_offset - PowerUpAutoValues.ROBOT_WIDTH / 2;
 		}
+		
+		horizontal_distance += 0.5 * Length.ft;
 
 		final double turn_0 = 60 * Length.in;
 		final double turn_1 = horizontal_distance - turn_0;
-		final double turn_2 = alliance_wall_edge - PowerUpAutoValues.ROBOT_WIDTH / 2 - (PowerUpAutoValues.SCALE_WIDTH / 2 - PowerUpAutoValues.ROBOT_LENGTH / 2);
+		final double turn_2 = alliance_wall_edge - PowerUpAutoValues.ROBOT_WIDTH / 2 - (PowerUpAutoValues.SCALE_WIDTH / 2 - PowerUpAutoValues.ROBOT_LENGTH / 2) - 0.5 * Length.in;
 		final double vertical_travel = PowerUpAutoValues.SCALE_DISTANCE - horizontal_distance - turn_2;
 
 		addSequential(drive.new CmdFancyArcTurn(turn_0, 85, 5000, PlateAllocation.getScale(), 1.0, true));
@@ -47,6 +49,7 @@ public class AutoScaleFromCenter extends AutoGuidoBase {
 		));
 
 		
-		addSequential(forklift.new CmdRunIntake(IntakeState.OUTTAKE, 500));
+		addSequential(drive.new CmdMoveForward(18 * Length.in, 1000, 1.0));
+		addSequential(forklift.new CmdRunIntake(IntakeState.OUTTAKE, 1000));
 	}
 }

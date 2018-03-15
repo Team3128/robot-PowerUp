@@ -10,6 +10,8 @@ import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.util.units.Length;
 
 import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.CameraServer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.command.CommandGroup;
@@ -74,5 +76,12 @@ public class MainGuidoPractice extends MainGuido {
 
 		rightDriveLeader.setInverted(true);
 		rightDriveLeader.setSensorPhase(true);
+	}
+	@Override
+	protected void updateDashboard()
+	{
+		NetworkTableInstance inst = NetworkTableInstance.getDefault();
+		NetworkTable table = inst.getTable("datatable");
+		table.getEntry("forkliftPosition").setDouble(forklift.currentPosition / Length.in);
 	}
 }

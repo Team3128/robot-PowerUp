@@ -108,7 +108,7 @@ public class Forklift
 	private double desiredTarget = 0;
 	private double setPoint = 0;
 	
-	public boolean rezero = false;
+	public boolean override = false;
 	
 	public Forklift(ForkliftState state, Intake intake, TalonSRX forkliftMotor, DigitalInput softStopLimitSwitch,
 			int limitSwitchLocation, int forkliftMaxVelocity)
@@ -148,7 +148,7 @@ public class Forklift
 					this.canLower = this.forkliftMotor.getSelectedSensorPosition(0) > 100;
 					
 					if (this.controlMode == ForkliftControlMode.PERCENT) {
-						if (this.rezero) {
+						if (this.override) {
 							target = this.desiredTarget;
 							this.forkliftMotor.set(ControlMode.PercentOutput, target);
 							
