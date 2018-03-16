@@ -82,6 +82,16 @@ public class MainGuidoPractice extends MainGuido {
 	{
 		NetworkTableInstance inst = NetworkTableInstance.getDefault();
 		NetworkTable table = inst.getTable("datatable");
+		//table.getEntry("cameraURL").setString("10.31.28.2:1181/?action=stream");
 		table.getEntry("forkliftPosition").setDouble(forklift.currentPosition / Length.in);
+		if (drive.isInHighGear()) {
+			
+			table.getEntry("gearValue").setString("HIGH GEAR");
+			
+		} else {
+		
+			table.getEntry("gearValue").setString("LOW GEAR");
+		
+		}
 	}
 }
