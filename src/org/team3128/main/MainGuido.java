@@ -9,7 +9,6 @@
 package org.team3128.main;
 
 import org.team3128.autonomous.AutoCrossBaseline;
-import org.team3128.autonomous.AutoScaleFromCenter;
 import org.team3128.autonomous.AutoScaleFromSide;
 import org.team3128.autonomous.AutoSwitchFromCenter;
 import org.team3128.autonomous.AutoSwitchFromSide;
@@ -212,6 +211,14 @@ public class MainGuido extends NarwhalRobot
 			}
 		});
 
+		listenerRight.nameControl(ControllerExtreme3D.TRIGGER, "SoftDrop");
+		listenerRight.addButtonDownListener("SoftDrop", () -> {
+			intake.setState(IntakeState.SOFT_DROP);
+		});
+		listenerRight.addButtonUpListener("SoftDrop", () -> {
+			intake.setState(IntakeState.STOPPED);
+		});
+		
 		listenerRight.nameControl(new Button(5), "ForkliftRightUp");
 		listenerRight.addButtonDownListener("ForkliftRightUp", () ->
 		{
@@ -318,11 +325,11 @@ public class MainGuido extends NarwhalRobot
 		auto_delay = SmartDashboard.getNumber("Autonomous Delay", 0);
 		SmartDashboard.putNumber("Autonomous Delay", auto_delay);
 		
-		programChooser.addDefault("None", null);
+		programChooser.addObject("None", null);
 //		Debug
 //		
 //		programChooser.addObject("Drive 50 Inches", new AutoDriveDistance(this, 50 * Length.in));
-////		programChooser.addObject("Drive 75 Inches", new AutoDriveDistance(this, 75 * Length.in));
+//		programChooser.addObject("Drive 75 Inches", new AutoDriveDistance(this, 75 * Length.in));
 //		programChooser.addObject("Drive 100 Inches", new AutoDriveDistance(this, 100 * Length.in));
 //		programChooser.addObject("Drive 125 Inches", new AutoDriveDistance(this, 125 * Length.in));
 //		
@@ -337,13 +344,11 @@ public class MainGuido extends NarwhalRobot
 		
 		programChooser.addObject("Cross Auto Line", new AutoCrossBaseline(drive, forklift, auto_delay));
 		
-		programChooser.addObject("Center Switch", new AutoSwitchFromCenter(drive, forklift, auto_delay));
-		programChooser.addObject("Center Scale", new AutoScaleFromCenter(drive, forklift, auto_delay));
+		programChooser.addDefault("Center Switch", new AutoSwitchFromCenter(drive, forklift, auto_delay));
 		
 		programChooser.addObject("Left Switch", new AutoSwitchFromSide(drive, forklift, Direction.LEFT, auto_delay));
-		programChooser.addObject("Right Switch", new AutoSwitchFromSide(drive, forklift, Direction.RIGHT, auto_delay));
 		
-		programChooser.addObject("Left Scale", new AutoScaleFromSide(drive, forklift, Direction.LEFT, auto_delay));
+		programChooser.addObject("Right Scale", new AutoScaleFromSide(drive, forklift, Direction.RIGHT, auto_delay));
 		
 		
 	}
@@ -410,6 +415,8 @@ public class MainGuido extends NarwhalRobot
 		
 //		SmartDashboard.putNumber("Forklift Velocity", forkliftMotorLeader.getSelectedSensorVelocity(0));
 		SmartDashboard.putNumber("Forklift Position", forkliftMotorLeader.getSelectedSensorPosition(0));
+		
+		SmartDashboard.putString("Selected Autonomous", ((SendableChooser)SmartDashboard.getData("autoChooser")).getSelected().toString());
 //
 //		SmartDashboard.putNumber("Current Forklift Error (in)", forklift.error / Length.in);
 //		SmartDashboard.putNumber("Current Forklift Position (in)", forklift.currentPosition / Length.in);
@@ -427,6 +434,7 @@ public class MainGuido extends NarwhalRobot
 //
 //		
 //		SmartDashboard.putString("Forklift Control Mode", forklift.controlMode.getName());
+		
 		
 		if (drive.isInHighGear())
 		{

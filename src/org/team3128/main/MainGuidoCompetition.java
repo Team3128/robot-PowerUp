@@ -8,6 +8,7 @@ package org.team3128.main;
 
 import org.team3128.common.hardware.misc.Piston;
 import org.team3128.common.listener.controltypes.Button;
+import org.team3128.common.util.Log;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
 import org.team3128.util.PlateAllocation;
@@ -83,6 +84,9 @@ public class MainGuidoCompetition extends MainGuido
 			{
 				climberPiston.invertPiston();
 			}
+			else {
+				Log.info("MainGuidoCompetition", "Climber not locked!");
+			}
 		});
 	}
 
@@ -147,8 +151,8 @@ public class MainGuidoCompetition extends MainGuido
 			near_switch_right_color = false;
 		}
 		
-		//SmartDashboard.putBoolean("Near Switch Right", near_switch_right_color);
-		//SmartDashboard.putBoolean("Near Switch Left", !near_switch_right_color);
+		SmartDashboard.putBoolean("Near Switch Right", near_switch_right_color);
+		SmartDashboard.putBoolean("Near Switch Left", !near_switch_right_color);
 		
 		
 		boolean scale_right = PlateAllocation.getScale() == Direction.RIGHT;
@@ -161,10 +165,9 @@ public class MainGuidoCompetition extends MainGuido
 			scale_right_color = false;
 		}
 		
-		//SmartDashboard.putBoolean("Scale Right", scale_right_color);
-		//SmartDashboard.putBoolean("Scale Left", !scale_right_color);
-		
-		
+		SmartDashboard.putBoolean("Scale Right", scale_right_color);
+		SmartDashboard.putBoolean("Scale Left", !scale_right_color);
+				
 		boolean far_switch_right = PlateAllocation.getFarSwitch() == Direction.RIGHT;
 		boolean far_switch_right_color = true;
 		
@@ -175,7 +178,7 @@ public class MainGuidoCompetition extends MainGuido
 			far_switch_right_color = false;
 		}
 		
-		//SmartDashboard.putBoolean("Far Switch Right", far_switch_right_color);
-		//SmartDashboard.putBoolean("Far Switch Left", !far_switch_right_color);
+		SmartDashboard.putBoolean("Far Switch Right", far_switch_right_color);
+		SmartDashboard.putBoolean("Far Switch Left", !far_switch_right_color);
 	}
 }

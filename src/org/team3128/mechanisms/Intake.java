@@ -14,9 +14,10 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
 public class Intake {
 	public enum IntakeState {
-		STOPPED(0, true, "Stopped"),
+		STOPPED(-0.2, true, "Stopped"),
 		INTAKE(-1.0, false, "Intake"),
-		OUTTAKE(1.0, true, "Outtake");
+		OUTTAKE(1.0, true, "Outtake"),
+		SOFT_DROP(0.5, false, "Soft Drop");
 
 		private double rollerPower;
 		private boolean isClosed;

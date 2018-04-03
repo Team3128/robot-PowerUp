@@ -1,7 +1,9 @@
 package org.team3128.autonomous;
 
 import org.team3128.autonomous.util.PowerUpAutoValues;
+import org.team3128.common.autonomous.primitives.CmdDelay;
 import org.team3128.common.autonomous.primitives.CmdRunInParallel;
+import org.team3128.common.autonomous.primitives.CmdRunInSeries;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.util.enums.Direction;
 import org.team3128.common.util.units.Length;
@@ -16,42 +18,47 @@ public class AutoScaleFromSide extends AutoGuidoBase
 	{
 		super(drive, forklift, delay);
 
-		if (side == PlateAllocation.getNearSwitch()) {
-			final double horizontal_distance = PowerUpAutoValues.ALLIANCE_WALL_EDGE -(PowerUpAutoValues.ROBOT_WIDTH / 2) - (PowerUpAutoValues.SCALE_WIDTH / 2);
-			final double vertical_distance = PowerUpAutoValues.SCALE_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH - horizontal_distance + 1 * Length.ft;
+		if (side == PlateAllocation.getScale()) {
+			System.out.println("---------SAME SIDE-------");
+			final double arc_distance = PowerUpAutoValues.SCALE_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH - 2.2 * Length.ft;
 			
-			final float angle = 10f;
+			final float angle = 45f;
 			
-			final double large_turn_radius = vertical_distance * 180 / (angle * Math.PI);
+			final double large_turn_radius = arc_distance * 180 / (angle * Math.PI);
 					
 			// (pi/180) * r = d
 			
-			addSequential(drive.new CmdFancyArcTurn(large_turn_radius, angle, 10000, side));
 			addSequential(new CmdRunInParallel(
-					drive.new CmdInPlaceTurn(85, 1.0, 1500, side.opposite()),
-					forklift.new CmdSetForkliftPosition(ForkliftState.SCALE))
+					drive.new CmdFancyArcTurn(large_turn_radius, angle, 10000, side.opposite(), 1.0),
+					
+					new CmdRunInSeries(
+							new CmdDelay(2),
+							forklift.new CmdSetForkliftPosition(ForkliftState.SCALE))
+					)
 			);
 		}
 		else {
-			final double vertical = 1.6 * Length.ft + PowerUpAutoValues.SWITCH_BACK_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH;
+			final double vertical = PowerUpAutoValues.SWITCH_FRONT_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH/2 + 0.7*Length.ft;
 			final double turn_1 = (PowerUpAutoValues.SWITCH_BACK_DISTANCE - PowerUpAutoValues.SWITCH_FRONT_DISTANCE) / 2;
 
-			final double horizontal = PowerUpAutoValues.SCALE_WIDTH - 2 * Length.ft;
-			
-			final double turn_2 = (PowerUpAutoValues.SCALE_DISTANCE - vertical - turn_1) / 2 - 1.5 * Length.ft;
+			final double horiz_distance = PowerUpAutoValues.SCALE_WIDTH - 3 * Length.ft;
+						
 			
 			addSequential(drive.new CmdMoveForward(vertical, 10000, true, 1.0));
-			addSequential(drive.new CmdFancyArcTurn(turn_1, 89, 5000, side.opposite(), 1.0, true));
+			addSequential(drive.new CmdFancyArcTurn(turn_1, 95, 5000, side.opposite(), 1.0, true));
+			addSequential(drive.new CmdMoveForward(horiz_distance, 4000, true, 1.0));
 			
-			addSequential(drive.new CmdMoveForward(horizontal, 10000, true, 1.0));
+			addSequential(drive.new CmdFancyArcTurn(PowerUpAutoValues.ROBOT_WIDTH + 2 * Length.in, 95, 2000, side, 1.0, true));
 			
 			addSequential(new CmdRunInParallel(
-					drive.new CmdFancyArcTurn(turn_2, 170, 10000, side, 1.0, false),
-					forklift.new CmdSetForkliftPosition(ForkliftState.SCALE)
-					));
+					drive.new CmdMoveForward(3 * Length.ft, 2000, false, 1.0),
+					forklift.new CmdSetForkliftPosition(ForkliftState.SCALE))
+			);
 		}
 		
-		addSequential(drive.new CmdMoveForward(2 * Length.ft, 500, 1.0));
+		
 		addSequential(forklift.new CmdRunIntake(IntakeState.OUTTAKE, 1000));
+		
+		addSequential(drive.new CmdMoveForward(-1 * Length.ft, 500, 1.0));
 	}
 }

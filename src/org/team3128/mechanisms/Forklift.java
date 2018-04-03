@@ -227,6 +227,28 @@ public class Forklift
 	{
 		return !softStopLimitSwitch.get();
 	}
+	
+	public class CmdZeroForklift extends Command {
+		private boolean done = false;
+		
+		public CmdZeroForklift() {
+			super(0.5);
+		}
+		
+		@Override
+		protected void initialize() {
+			forkliftMotor.setSelectedSensorPosition(limitSwitchLocation, 0, Constants.CAN_TIMEOUT);
+			state = ForkliftState.GROUND;
+			
+			done = true;
+		}
+
+		@Override
+		protected boolean isFinished()
+		{
+			return true || isTimedOut();
+		}
+	}
 
 	public class CmdSetForkliftPosition extends Command
 	{
@@ -234,7 +256,7 @@ public class Forklift
 
 		public CmdSetForkliftPosition(ForkliftState heightState)
 		{
-			super(3000);
+			super(3);
 			this.heightState = heightState;
 		}
 

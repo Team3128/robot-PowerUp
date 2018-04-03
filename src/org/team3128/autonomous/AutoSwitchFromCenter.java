@@ -4,6 +4,7 @@ import org.team3128.autonomous.util.PowerUpAutoValues;
 import org.team3128.common.autonomous.primitives.CmdRunInParallel;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.util.enums.Direction;
+import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Forklift.ForkliftState;
 import org.team3128.mechanisms.Intake.IntakeState;
@@ -43,6 +44,7 @@ public class AutoSwitchFromCenter extends AutoGuidoBase {
 				forklift.new CmdSetForkliftPosition(ForkliftState.SWITCH)
 		));
 		
+		addSequential(drive.new CmdMoveForward(2 * Length.ft, 500, 1.0));
 		addSequential(forklift.new CmdRunIntake(IntakeState.OUTTAKE, 500));
 	}
 }
