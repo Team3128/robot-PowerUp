@@ -12,9 +12,9 @@ import org.team3128.mechanisms.Forklift.ForkliftState;
 import org.team3128.mechanisms.Intake.IntakeState;
 import org.team3128.util.PlateAllocation;
 
-public class AutoScaleFromSide extends AutoGuidoBase
+public class AutoScaleFromRightTwoCoulombs extends AutoGuidoBase
 {
-	public AutoScaleFromSide(SRXTankDrive drive, Forklift forklift, Direction side, double delay)
+	public AutoScaleFromRightTwoCoulombs(SRXTankDrive drive, Forklift forklift, Direction side, double delay)
 	{
 		super(drive, forklift, delay);
 
@@ -22,9 +22,15 @@ public class AutoScaleFromSide extends AutoGuidoBase
 			System.out.println("---------SAME SIDE-------");
 			final double arc_distance = PowerUpAutoValues.SCALE_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH - 2.2 * Length.ft;
 			
-			final float angle = 10f;
+			final float angle = 45f;
 			
 			final double large_turn_radius = arc_distance * 180 / (angle * Math.PI);
+			
+			final float small_turn_radius = (float) (arc_distance * 160 / (angle * Math.PI));
+			
+			final float small_forward = (float) (1 * Length.ft);
+			
+			final double small_arc_distance = (PowerUpAutoValues.SWITCH_SCALE_DISTANCE - PowerUpAutoValues.SWITCH_BACK_DISTANCE) / (2 * Length.ft);
 					
 			// (pi/180) * r = d
 			
@@ -33,11 +39,61 @@ public class AutoScaleFromSide extends AutoGuidoBase
 					
 					new CmdRunInSeries(
 							new CmdDelay(2),
-							forklift.new CmdSetForkliftPosition(ForkliftState.SCALE))
+							forklift.new CmdSetForkliftPosition(ForkliftState.SCALE)),
+					
+					forklift.new CmdRunIntake(IntakeState.OUTTAKE, 1000)
+					
+					)
+					
+			);
+			
+			addSequential(new CmdRunInParallel(
+					
+					forklift.new CmdRunIntake(IntakeState.STOPPED, 1000),
+					
+					drive.new CmdMoveForward(-small_arc_distance, 2000, true),
+					
+					forklift.new CmdSetForkliftPosition(ForkliftState.GROUND),
+					
+					drive.new CmdFancyArcTurn(small_arc_distance, small_turn_radius, 4000, side.opposite())
+					
+					)
+					
+			);
+			
+			addSequential(new CmdRunInParallel(
+							
+					forklift.new CmdRunIntake(IntakeState.INTAKE, 2000),
+							
+					drive.new CmdMoveForward(small_forward, 1250, true),
+					
+					new CmdRunInSeries(
+					
+						new CmdDelay(1),
+						forklift.new CmdRunIntake(IntakeState.STOPPED, 1000)
+							
+					)
+		
 					)
 			);
+			
+			addSequential(new CmdRunInParallel(
+					
+					drive.new CmdFancyArcTurn(-small_arc_distance, small_turn_radius, 4000, side.opposite()),
+					
+					forklift.new CmdSetForkliftPosition(ForkliftState.SCALE),
+					
+					drive.new CmdMoveForward(small_arc_distance, 2000, true),
+					
+					forklift.new CmdRunIntake(IntakeState.OUTTAKE, 1000),
+					
+					drive.new CmdMoveForward(-small_arc_distance, 2000, true)
+					
+					)	
+				);
 		}
 		else {
+			/*
 			final double vertical = PowerUpAutoValues.SWITCH_FRONT_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH/2 + 0.7*Length.ft;
 			final double turn_1 = (PowerUpAutoValues.SWITCH_BACK_DISTANCE - PowerUpAutoValues.SWITCH_FRONT_DISTANCE) / 2;
 
@@ -54,11 +110,13 @@ public class AutoScaleFromSide extends AutoGuidoBase
 					drive.new CmdMoveForward(3 * Length.ft, 2000, false, 1.0),
 					forklift.new CmdSetForkliftPosition(ForkliftState.SCALE))
 			);
+			*/
 		}
 		
-		
+		/*
 		addSequential(forklift.new CmdRunIntake(IntakeState.OUTTAKE, 1000));
 		
 		addSequential(drive.new CmdMoveForward(-1 * Length.ft, 500, 1.0));
+		*/
 	}
 }

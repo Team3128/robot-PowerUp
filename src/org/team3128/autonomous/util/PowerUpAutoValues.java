@@ -14,19 +14,19 @@ public class PowerUpAutoValues {
 	 * 
 	 * FIX WITH BUPPS
 	 */
-	public final static double ROBOT_WIDTH = 38 * Length.in;
+	public final static double ROBOT_WIDTH = /* 38 */ 31.5 * Length.in;
 
 	/**
 	 * The length (front edge to back edge) of the robot's bumpers.
 	 * 
 	 * FIX WITH BUPPS
 	 */
-	public final static double ROBOT_LENGTH = 33.5 * Length.in;
+	public final static double ROBOT_LENGTH = /* 33.5 */ 27 * Length.in;
 
 	/**
 	 * How many inches the loaded power cube extends in front of the bumpers.
 	 */
-	public final static double CUBE_EXTENSION = 4 * Length.in;
+	public final static double CUBE_EXTENSION = /* 4 */ 7 * Length.in;
 
 	
 	// Field-specific values

@@ -16,6 +16,6 @@ public class AutoArcTurn extends CommandGroup
 {
 	public AutoArcTurn(MainGuido robot, double angle, Direction dir)
 	{
-		addSequential(robot.drive.new CmdFancyArcTurn(36 * Length.in, (float) angle, 10000, dir, 1.0, true));
+		addSequential(robot.drive.new CmdFancyArcTurn(72 * Length.in, (float) angle, 10000, dir, 1.0, true));
 	}
 }

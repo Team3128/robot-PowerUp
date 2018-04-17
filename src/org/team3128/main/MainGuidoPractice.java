@@ -80,6 +80,7 @@ public class MainGuidoPractice extends MainGuido {
 	@Override
 	protected void updateDashboard()
 	{
+		super.updateDashboard();
 		NetworkTableInstance inst = NetworkTableInstance.getDefault();
 		NetworkTable table = inst.getTable("datatable");
 		//table.getEntry("cameraURL").setString("10.31.28.2:1181/?action=stream");

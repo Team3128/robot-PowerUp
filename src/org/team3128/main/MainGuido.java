@@ -9,9 +9,13 @@
 package org.team3128.main;
 
 import org.team3128.autonomous.AutoCrossBaseline;
+import org.team3128.autonomous.AutoScaleFromRightTwoCoulombs;
 import org.team3128.autonomous.AutoScaleFromSide;
+import org.team3128.autonomous.AutoScaleSwitchFromRight;
 import org.team3128.autonomous.AutoSwitchFromCenter;
 import org.team3128.autonomous.AutoSwitchFromSide;
+import org.team3128.autonomous.AutoTwoSwitchFromCenter;
+import org.team3128.autonomous.debug.AutoArcTurn;
 import org.team3128.common.NarwhalRobot;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.hardware.misc.Piston;
@@ -24,6 +28,7 @@ import org.team3128.common.listener.controltypes.POV;
 import org.team3128.common.util.Constants;
 import org.team3128.common.util.Log;
 import org.team3128.common.util.enums.Direction;
+import org.team3128.common.util.units.Angle;
 import org.team3128.common.util.units.Length;
 import org.team3128.mechanisms.Forklift;
 import org.team3128.mechanisms.Forklift.ForkliftState;
@@ -336,7 +341,8 @@ public class MainGuido extends NarwhalRobot
 //		programChooser.addObject("Test Smooth", new AutoTestSmooth(this));
 //		programChooser.addObject("Test Not Smooth", new AutoTestNotSmooth(this));
 //		
-//		programChooser.addObject("Arc Turn RIGHT 90 degrees", new AutoArcTurn(this, 90 * Angle.DEGREES, Direction.RIGHT));
+		programChooser.addObject("Arc Turn Forwards", new AutoArcTurn(this, 90 * Angle.DEGREES, Direction.RIGHT));
+		programChooser.addObject("Arc Turn Backwards", new AutoArcTurn(this, -90 * Angle.DEGREES, Direction.LEFT));
 //		
 //		programChooser.addObject("Forklift Set Scale", new AutoSetForkliftState(this, ForkliftState.SCALE));
 //		programChooser.addObject("Forklift Set Switch", new AutoSetForkliftState(this, ForkliftState.SWITCH));
@@ -345,12 +351,15 @@ public class MainGuido extends NarwhalRobot
 		programChooser.addObject("Cross Auto Line", new AutoCrossBaseline(drive, forklift, auto_delay));
 		
 		programChooser.addDefault("Center Switch", new AutoSwitchFromCenter(drive, forklift, auto_delay));
+		programChooser.addObject("Center Switch x2", new AutoTwoSwitchFromCenter(drive, forklift, auto_delay));
 		
 		programChooser.addObject("Left Switch", new AutoSwitchFromSide(drive, forklift, Direction.LEFT, auto_delay));
 		
 		programChooser.addObject("Right Scale", new AutoScaleFromSide(drive, forklift, Direction.RIGHT, auto_delay));
 		
-		
+		programChooser.addObject("Right Scale Two", new AutoScaleFromRightTwoCoulombs(drive, forklift, Direction.RIGHT, auto_delay));
+
+		programChooser.addObject("Right Scale Switch", new AutoScaleSwitchFromRight(drive, forklift, Direction.RIGHT, auto_delay));
 	}
 
 	@Override
