@@ -37,7 +37,8 @@ public class Forklift
 	{
 		GROUND(0 * Length.ft),
 		SWITCH(3 * Length.ft),
-		SCALE(57 * Length.in);
+		SCALE(59 * Length.in),
+		HI_SCALE(64 * Length.in);;
 
 		public double targetHeight;
 

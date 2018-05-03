@@ -1,5 +1,4 @@
 /*
- * Date: 1/12/2018
  * Description: Setup teleop/auto for competition
  *
  */

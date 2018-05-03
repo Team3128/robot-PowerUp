@@ -34,13 +34,11 @@ public class AutoSwitchFromSide extends AutoGuidoBase
 		}
 		else {
 			final double vertical = PowerUpAutoValues.SWITCH_FRONT_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH/2 + 0.7*Length.ft;
-			 double turn = PowerUpAutoValues.ALLIANCE_WALL_EDGE - (PowerUpAutoValues.SWITCH_WIDTH / 2) -
+			double turn = PowerUpAutoValues.ALLIANCE_WALL_EDGE - (PowerUpAutoValues.SWITCH_WIDTH / 2) -
 					(PowerUpAutoValues.ROBOT_WIDTH / 2) - (PowerUpAutoValues.ROBOT_LENGTH / 2) - PowerUpAutoValues.CUBE_EXTENSION;
 			
-
-				turn -= 6 * Length.in;
+			turn -= 6 * Length.in;
 		
-			
 			addSequential(drive.new CmdMoveForward(vertical, 10000, true, 1.0));
 						
 			addSequential(new CmdRunInParallel(

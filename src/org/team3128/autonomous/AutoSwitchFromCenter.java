@@ -1,6 +1,7 @@
 package org.team3128.autonomous;
 
 import org.team3128.autonomous.util.PowerUpAutoValues;
+import org.team3128.common.autonomous.primitives.CmdDelay;
 import org.team3128.common.autonomous.primitives.CmdRunInParallel;
 import org.team3128.common.drive.SRXTankDrive;
 import org.team3128.common.util.enums.Direction;
@@ -16,6 +17,10 @@ public class AutoSwitchFromCenter extends AutoGuidoBase {
 	public AutoSwitchFromCenter(SRXTankDrive drive, Forklift forklift, double delay) {
 		super(drive, forklift, delay);
 		
+		if (PlateAllocation.getScale().equals(Direction.RIGHT)) {
+			addSequential(new CmdDelay(5));
+		}
+		
 		final double robot_center_offset = PowerUpAutoValues.ROBOT_WIDTH / 2 - PowerUpAutoValues.CENTER_OFFSET;
 
 		double horizontal_distance;
@@ -30,6 +35,7 @@ public class AutoSwitchFromCenter extends AutoGuidoBase {
 		final double vertical_travel = PowerUpAutoValues.SWITCH_FRONT_DISTANCE - PowerUpAutoValues.ROBOT_LENGTH
 				- horizontal_distance - PowerUpAutoValues.CUBE_EXTENSION;
 		
+		
 		addSequential(drive.new CmdFancyArcTurn(turn_radius, 85, 5000, PlateAllocation.getNearSwitch(), 1.0, true));
 		
 		float second_turn_angle;
@@ -38,7 +44,7 @@ public class AutoSwitchFromCenter extends AutoGuidoBase {
 			second_turn_angle = 85;
 		}
 		else {
-			second_turn_angle = 95;
+			second_turn_angle = 90;
 		}
 		addSequential(drive.new CmdFancyArcTurn(turn_radius, second_turn_angle, 5000, PlateAllocation.getNearSwitch().opposite(), 1.0, true));
 

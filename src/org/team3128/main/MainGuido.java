@@ -8,12 +8,13 @@
 
 package org.team3128.main;
 
+import org.team3128.AutoSideSwitchOrScale;
 import org.team3128.autonomous.AutoCrossBaseline;
-import org.team3128.autonomous.AutoScaleFromRightTwoCoulombs;
 import org.team3128.autonomous.AutoScaleFromSide;
 import org.team3128.autonomous.AutoScaleSwitchFromRight;
 import org.team3128.autonomous.AutoSwitchFromCenter;
 import org.team3128.autonomous.AutoSwitchFromSide;
+import org.team3128.autonomous.AutoTwoScaleFromSide;
 import org.team3128.autonomous.AutoTwoSwitchFromCenter;
 import org.team3128.autonomous.debug.AutoArcTurn;
 import org.team3128.common.NarwhalRobot;
@@ -353,11 +354,13 @@ public class MainGuido extends NarwhalRobot
 		programChooser.addDefault("Center Switch", new AutoSwitchFromCenter(drive, forklift, auto_delay));
 		programChooser.addObject("Center Switch x2", new AutoTwoSwitchFromCenter(drive, forklift, auto_delay));
 		
+		programChooser.addObject("Right Switch or Scale", new AutoSideSwitchOrScale(drive, forklift, Direction.RIGHT, auto_delay));
+		
 		programChooser.addObject("Left Switch", new AutoSwitchFromSide(drive, forklift, Direction.LEFT, auto_delay));
 		
 		programChooser.addObject("Right Scale", new AutoScaleFromSide(drive, forklift, Direction.RIGHT, auto_delay));
 		
-		programChooser.addObject("Right Scale Two", new AutoScaleFromRightTwoCoulombs(drive, forklift, Direction.RIGHT, auto_delay));
+		programChooser.addObject("Right Scale Two", new AutoTwoScaleFromSide(drive, forklift, Direction.RIGHT, auto_delay));
 
 		programChooser.addObject("Right Scale Switch", new AutoScaleSwitchFromRight(drive, forklift, Direction.RIGHT, auto_delay));
 	}
